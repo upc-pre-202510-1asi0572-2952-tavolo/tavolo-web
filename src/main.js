@@ -44,14 +44,14 @@ const pinia = createPinia()
 
 app.use(pinia);
 
-setupInterceptors(); // <--- Añade esta línea
+setupInterceptors();
 
 app.use(PrimeVue, {
     ripple: true,
     theme: {
         preset: Aura,
         options: {
-            darkMode: false, // Deshabilitar modo oscuro
+            darkMode: false,
         }
     }
 });

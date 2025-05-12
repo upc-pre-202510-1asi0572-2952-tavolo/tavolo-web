@@ -110,7 +110,7 @@ const toggleSidebar = () => {
         />
       </template>
     </pv-toolbar>
-    
+
     <pv-sidebar v-model:visible="sidebarVisible" position="right" class="mobile-sidebar">
       <div class="sidebar-header">
         <h3>Menú</h3>
