@@ -1,0 +1,401 @@
+<script setup>
+import { useRouter } from 'vue-router';
+import { useAuthenticationStore } from '@/iam/services/authentication.store';
+import { RoleEnum } from '@/iam/model/role.enum';
+import AuthenticationSection from '@/iam/components/authentication-section.component.vue';
+import { ref } from 'vue'; // Importar ref para estado reactivo
+
+const router = useRouter();
+const authStore = useAuthenticationStore();
+const sidebarVisible = ref(false); // Estado para controlar la visibilidad del sidebar
+
+const navigateTo = (routeName) => {
+  router.push({ name: routeName });
+  sidebarVisible.value = false; // Cerrar sidebar después de navegar
+};
+
+const handleSignOut = () => {
+  authStore.signOut(router);
+  sidebarVisible.value = false; // Cerrar sidebar después de cerrar sesión
+};
+
+const toggleSidebar = () => {
+  sidebarVisible.value = !sidebarVisible.value;
+};
+</script>
+
+<template>
+  <div class="navbar-container" v-if="authStore.isSignedIn">
+    <!-- Toolbar principal -->
+    <pv-toolbar class="custom-toolbar p-0">
+      <!-- Logo/Brand - Lado izquierdo -->
+      <template #start>
+        <div class="brand" @click="navigateTo('home')">
+          <img src="@/assets/images/icon_tavolo.svg" alt="Tavolo" class="mr-2 brand-logo" />
+          <span class="brand-name">Tavolo</span>
+        </div>
+      </template>
+
+      <!-- Menú - Lado derecho -->
+      <template #end>
+        <!-- Navegación desktop -->
+        <div class="desktop-menu">
+          <!-- Opciones para ROLE_USER -->
+          <div v-rbac="[RoleEnum.USER]" class="nav-menu">
+            <pv-button 
+              label="Inicio" 
+              icon="pi pi-home" 
+              class="p-button-text nav-item" 
+              @click="navigateTo('home')"
+            />
+            <pv-button 
+              label="Menú" 
+              icon="pi pi-book" 
+              class="p-button-text nav-item" 
+              @click="navigateTo('menu')"
+            />
+            <pv-button 
+              label="Reservar" 
+              icon="pi pi-calendar-plus" 
+              class="p-button-text nav-item" 
+              @click="navigateTo('reservation')"
+            />
+          </div>
+
+          <!-- Opciones para ROLE_SUPERVISOR -->
+          <div v-rbac="[RoleEnum.SUPERVISOR]" class="nav-menu">
+            <pv-button 
+              label="Inicio" 
+              icon="pi pi-home" 
+              class="p-button-text nav-item" 
+              @click="navigateTo('home')"
+            />
+            <pv-button 
+              label="Gestión de Mesas" 
+              icon="pi pi-table" 
+              class="p-button-text nav-item" 
+              @click="navigateTo('table-management')"
+            />
+            <pv-button 
+              label="Ver Reservas" 
+              icon="pi pi-calendar" 
+              class="p-button-text nav-item" 
+              @click="navigateTo('reservations')"
+            />
+          </div>
+
+          <!-- Opciones para ROLE_ADMIN -->
+          <div v-rbac="[RoleEnum.ADMIN]" class="nav-menu">
+            <pv-button 
+              label="Inicio" 
+              icon="pi pi-home" 
+              class="p-button-text nav-item" 
+              @click="navigateTo('home')"
+            />
+            <pv-button 
+              label="Gestión de Mesas" 
+              icon="pi pi-table" 
+              class="p-button-text nav-item" 
+              @click="navigateTo('table-management')"
+            />
+            <pv-button 
+              label="Ver Reservas" 
+              icon="pi pi-calendar" 
+              class="p-button-text nav-item" 
+              @click="navigateTo('reservations')"
+            />
+          </div>
+        </div>
+        
+        <!-- Sección de autenticación siempre visible -->
+        <authentication-section class="auth-desktop" />
+        
+        <!-- Botón de menú móvil -->
+        <pv-button 
+          icon="pi pi-bars" 
+          class="p-button-text mobile-menu-btn" 
+          @click="toggleSidebar"
+          aria-label="Menú"
+        />
+      </template>
+    </pv-toolbar>
+    
+    <!-- Sidebar para menú móvil -->
+    <pv-sidebar v-model:visible="sidebarVisible" position="right" class="mobile-sidebar">
+      <div class="sidebar-header">
+        <h3>Menú</h3>
+      </div>
+      
+      <!-- Información del usuario en móvil -->
+      <div class="sidebar-user-info">
+        <i class="pi pi-user mr-2"></i>
+        <span>{{ authStore.currentUsername }}</span>
+      </div>
+      
+      <!-- Menús basados en roles para móvil -->
+      <div class="sidebar-content">
+        <!-- Menú para ROLE_USER en móvil -->
+        <div v-rbac="[RoleEnum.USER]" class="mobile-menu-group">
+          <h4 class="menu-group-title">Navegación</h4>
+          <ul class="mobile-menu-list">
+            <li @click="navigateTo('home')">
+              <i class="pi pi-home mr-2"></i>Inicio
+            </li>
+            <li @click="navigateTo('menu')">
+              <i class="pi pi-book mr-2"></i>Menú
+            </li>
+            <li @click="navigateTo('reservation')">
+              <i class="pi pi-calendar-plus mr-2"></i>Reservar
+            </li>
+          </ul>
+        </div>
+      
+        <!-- Menú para ROLE_SUPERVISOR en móvil -->
+        <div v-rbac="[RoleEnum.SUPERVISOR]" class="mobile-menu-group">
+          <h4 class="menu-group-title">Navegación</h4>
+          <ul class="mobile-menu-list">
+            <li @click="navigateTo('home')">
+              <i class="pi pi-home mr-2"></i>Inicio
+            </li>
+            <li @click="navigateTo('table-management')">
+              <i class="pi pi-table mr-2"></i>Gestión de Mesas
+            </li>
+            <li @click="navigateTo('reservations')">
+              <i class="pi pi-calendar mr-2"></i>Ver Reservas
+            </li>
+          </ul>
+        </div>
+      
+        <!-- Menú para ROLE_ADMIN en móvil -->
+        <div v-rbac="[RoleEnum.ADMIN]" class="mobile-menu-group">
+          <h4 class="menu-group-title">Navegación</h4>
+          <ul class="mobile-menu-list">
+            <li @click="navigateTo('home')">
+              <i class="pi pi-home mr-2"></i>Inicio
+            </li>
+            <li @click="navigateTo('table-management')">
+              <i class="pi pi-table mr-2"></i>Gestión de Mesas
+            </li>
+            <li @click="navigateTo('reservations')">
+              <i class="pi pi-calendar mr-2"></i>Ver Reservas
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Botón cerrar sesión en móvil -->
+      <div class="sidebar-footer">
+        <pv-button 
+          label="Cerrar sesión" 
+          icon="pi pi-sign-out" 
+          @click="handleSignOut" 
+          class="p-button-danger p-button-outlined w-full"
+        />
+      </div>
+    </pv-sidebar>
+  </div>
+</template>
+
+<style scoped>
+.navbar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  box-shadow: none;
+}
+
+/* Toolbar transparente */
+:deep(.custom-toolbar) {
+  background: transparent !important;
+  color: var(--text-color) !important;
+  border: none !important;
+  padding: 0.5rem !important;
+}
+
+/* Estilos de botones en toolbar */
+:deep(.custom-toolbar .p-button.p-button-text) {
+  color: var(--text-primary) !important;
+  background-color: transparent !important;
+  font-weight: 600;
+}
+
+:deep(.custom-toolbar .p-button.p-button-text:hover) {
+  background-color: rgba(172, 131, 98, 0.1) !important;
+}
+
+/* Estilos del brand */
+.brand {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px 16px;
+}
+
+.brand-logo {
+  height: 40px;
+  width: auto;
+}
+
+.brand-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-left: 8px;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+}
+
+.nav-item {
+  margin: 0 4px;
+  color: var(--text-primary);
+}
+
+/* Botón de menú móvil - oculto en desktop */
+.mobile-menu-btn {
+  display: none;
+}
+
+/* Estilos del sidebar móvil */
+.mobile-sidebar {
+  padding: 16px;
+}
+
+.sidebar-header h3 {
+  margin-top: 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.sidebar-user-info {
+  padding: 12px;
+  background-color: var(--primaryColor50);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.menu-group-title {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.mobile-menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mobile-menu-list li {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: all 0.2s;
+}
+
+.mobile-menu-list li:hover {
+  background-color: var(--primaryColor50);
+}
+
+.sidebar-content {
+  margin-bottom: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+}
+
+/* Personalizar el Sidebar para usar colores claros como el toolbar */
+:deep(.p-sidebar.mobile-sidebar) {
+  background-color: #ffffff !important;
+  color: var(--text-primary) !important;
+  border: none !important;
+}
+
+:deep(.p-sidebar.mobile-sidebar .p-sidebar-header) {
+  background-color: #ffffff !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--primaryColor100) !important;
+}
+
+:deep(.p-sidebar.mobile-sidebar .p-sidebar-content) {
+  background-color: #ffffff !important;
+  color: var(--text-primary) !important;
+}
+
+/* Sobrescribir el tema oscuro de Aura completamente */
+:deep(.p-sidebar.mobile-sidebar *) {
+  color: var(--text-primary) !important;
+}
+
+:deep(.p-sidebar-close) {
+  color: var(--text-primary) !important;
+}
+
+:deep(.p-sidebar-close:hover) {
+  background-color: var(--primaryColor50) !important;
+}
+
+/* Ajustar colores de los elementos dentro del sidebar */
+.sidebar-header h3 {
+  color: var(--text-primary) !important;
+}
+
+.sidebar-user-info {
+  background-color: var(--primaryColor50) !important;
+  color: var(--text-primary) !important;
+}
+
+.menu-group-title {
+  color: var(--text-secondary) !important;
+}
+
+.mobile-menu-list li {
+  color: var(--text-primary) !important;
+}
+
+.mobile-menu-list li:hover {
+  background-color: var(--primaryColor50) !important;
+}
+
+/* Asegurar que el botón de cerrar sesión tenga el estilo correcto */
+:deep(.p-button-danger.p-button-outlined) {
+  border-color: var(--primaryColor400) !important;
+  color: var(--text-primary) !important;
+}
+
+:deep(.p-button-danger.p-button-outlined:hover) {
+  background-color: var(--primaryColor50) !important;
+  border-color: var(--primaryColor600) !important;
+}
+
+/* Media queries para responsive */
+@media (max-width: 768px) {
+  .desktop-menu, .auth-desktop {
+    display: none;
+  }
+  
+  .mobile-menu-btn {
+    display: block;
+  }
+}
+
+@media (min-width: 769px) {
+  :deep(.mobile-sidebar) {
+    display: none;
+  }
+}
+</style>

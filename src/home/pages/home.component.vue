@@ -1,5 +1,6 @@
 <script setup>
 import { RoleEnum } from "@/iam/model/role.enum.js";
+import NavBar from '@/shared/components/nav-bar.component.vue'
 import { ref } from 'vue';
 
 // Función para generar informe (mock)
@@ -12,6 +13,8 @@ const username = ref('Usuario');
 </script>
 
 <template>
+  <NavBar/>
+
   <div class="home-container">
     <div class="home-content">
       <!-- Logo y título -->
