@@ -34,9 +34,14 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --p-drawer-background: var(--background-color) !important;
+  --p-drawer-content-background: var(--background-color) !important;
+  --p-sidebar-background: var(--background-color) !important;
+  --p-button-text-primary-active-background: rgba(172, 131, 98, 0.2) !important;
+
 }
 
-/* Aplicar a todos los elementos */
 * {
   transition: background-color 0.3s, color 0.3s;
 }
@@ -45,6 +50,18 @@ body {
   margin: 0;
   min-height: 100vh;
   background-color: var(--background-color);
+}
+
+.p-drawer {
+  background-color: var(--background-color) !important;
+}
+
+.p-drawer-content {
+  background-color: var(--background-color) !important;
+}
+
+.p-sidebar {
+  background-color: var(--background-color) !important;
 }
 
 #app {
