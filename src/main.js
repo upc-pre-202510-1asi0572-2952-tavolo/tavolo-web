@@ -36,6 +36,7 @@ import Textarea from "primevue/textarea";
 import Toolbar from "primevue/toolbar";
 import Toast from "primevue/toast";
 import SelectButton from "primevue/selectbutton";
+import Sidebar from "primevue/sidebar";
 
 
 const app = createApp(App)
@@ -43,14 +44,14 @@ const pinia = createPinia()
 
 app.use(pinia);
 
-setupInterceptors(); // <--- Añade esta línea
+setupInterceptors();
 
 app.use(PrimeVue, {
     ripple: true,
     theme: {
         preset: Aura,
         options: {
-            darkMode: false, // Deshabilitar modo oscuro
+            darkMode: false,
         }
     }
 });
@@ -83,7 +84,8 @@ app.component('pv-button', Button)
     .component('pv-tag', Tag)
     .component('pv-textarea', Textarea)
     .component('pv-toolbar', Toolbar)
-    .component('pv-toast', Toast);
+    .component('pv-toast', Toast)
+    .component('pv-sidebar', Sidebar);
 
 // Crea el router después de Pinia
 const router = createAppRouter()
