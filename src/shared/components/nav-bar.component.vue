@@ -3,20 +3,20 @@ import { useRouter } from 'vue-router';
 import { useAuthenticationStore } from '@/iam/services/authentication.store';
 import { RoleEnum } from '@/iam/model/role.enum';
 import AuthenticationSection from '@/iam/components/authentication-section.component.vue';
-import { ref } from 'vue'; // Importar ref para estado reactivo
+import { ref } from 'vue'; 
 
 const router = useRouter();
 const authStore = useAuthenticationStore();
-const sidebarVisible = ref(false); // Estado para controlar la visibilidad del sidebar
+const sidebarVisible = ref(false); 
 
 const navigateTo = (routeName) => {
   router.push({ name: routeName });
-  sidebarVisible.value = false; // Cerrar sidebar después de navegar
+  sidebarVisible.value = false;
 };
 
 const handleSignOut = () => {
   authStore.signOut(router);
-  sidebarVisible.value = false; // Cerrar sidebar después de cerrar sesión
+  sidebarVisible.value = false; 
 };
 
 const toggleSidebar = () => {
@@ -26,9 +26,7 @@ const toggleSidebar = () => {
 
 <template>
   <div class="navbar-container" v-if="authStore.isSignedIn">
-    <!-- Toolbar principal -->
     <pv-toolbar class="custom-toolbar p-0">
-      <!-- Logo/Brand - Lado izquierdo -->
       <template #start>
         <div class="brand" @click="navigateTo('home')">
           <img src="@/assets/images/icon_tavolo.svg" alt="Tavolo" class="mr-2 brand-logo" />
@@ -36,11 +34,8 @@ const toggleSidebar = () => {
         </div>
       </template>
 
-      <!-- Menú - Lado derecho -->
       <template #end>
-        <!-- Navegación desktop -->
         <div class="desktop-menu">
-          <!-- Opciones para ROLE_USER -->
           <div v-rbac="[RoleEnum.USER]" class="nav-menu">
             <pv-button 
               label="Inicio" 
@@ -62,7 +57,6 @@ const toggleSidebar = () => {
             />
           </div>
 
-          <!-- Opciones para ROLE_SUPERVISOR -->
           <div v-rbac="[RoleEnum.SUPERVISOR]" class="nav-menu">
             <pv-button 
               label="Inicio" 
@@ -84,7 +78,6 @@ const toggleSidebar = () => {
             />
           </div>
 
-          <!-- Opciones para ROLE_ADMIN -->
           <div v-rbac="[RoleEnum.ADMIN]" class="nav-menu">
             <pv-button 
               label="Inicio" 
@@ -107,10 +100,8 @@ const toggleSidebar = () => {
           </div>
         </div>
         
-        <!-- Sección de autenticación siempre visible -->
         <authentication-section class="auth-desktop" />
         
-        <!-- Botón de menú móvil -->
         <pv-button 
           icon="pi pi-bars" 
           class="p-button-text mobile-menu-btn" 
@@ -120,21 +111,17 @@ const toggleSidebar = () => {
       </template>
     </pv-toolbar>
     
-    <!-- Sidebar para menú móvil -->
     <pv-sidebar v-model:visible="sidebarVisible" position="right" class="mobile-sidebar">
       <div class="sidebar-header">
         <h3>Menú</h3>
       </div>
       
-      <!-- Información del usuario en móvil -->
       <div class="sidebar-user-info">
         <i class="pi pi-user mr-2"></i>
         <span>{{ authStore.currentUsername }}</span>
       </div>
       
-      <!-- Menús basados en roles para móvil -->
       <div class="sidebar-content">
-        <!-- Menú para ROLE_USER en móvil -->
         <div v-rbac="[RoleEnum.USER]" class="mobile-menu-group">
           <h4 class="menu-group-title">Navegación</h4>
           <ul class="mobile-menu-list">
@@ -150,7 +137,6 @@ const toggleSidebar = () => {
           </ul>
         </div>
       
-        <!-- Menú para ROLE_SUPERVISOR en móvil -->
         <div v-rbac="[RoleEnum.SUPERVISOR]" class="mobile-menu-group">
           <h4 class="menu-group-title">Navegación</h4>
           <ul class="mobile-menu-list">
@@ -166,7 +152,6 @@ const toggleSidebar = () => {
           </ul>
         </div>
       
-        <!-- Menú para ROLE_ADMIN en móvil -->
         <div v-rbac="[RoleEnum.ADMIN]" class="mobile-menu-group">
           <h4 class="menu-group-title">Navegación</h4>
           <ul class="mobile-menu-list">
@@ -183,7 +168,6 @@ const toggleSidebar = () => {
         </div>
       </div>
       
-      <!-- Botón cerrar sesión en móvil -->
       <div class="sidebar-footer">
         <pv-button 
           label="Cerrar sesión" 
@@ -225,7 +209,6 @@ const toggleSidebar = () => {
   background-color: rgba(172, 131, 98, 0.1) !important;
 }
 
-/* Estilos del brand */
 .brand {
   display: flex;
   align-items: center;
@@ -255,12 +238,10 @@ const toggleSidebar = () => {
   color: var(--text-primary);
 }
 
-/* Botón de menú móvil - oculto en desktop */
 .mobile-menu-btn {
   display: none;
 }
 
-/* Estilos del sidebar móvil */
 .mobile-sidebar {
   padding: 16px;
 }
@@ -318,7 +299,6 @@ const toggleSidebar = () => {
   margin-top: auto;
 }
 
-/* Personalizar el Sidebar para usar colores claros como el toolbar */
 :deep(.p-sidebar.mobile-sidebar) {
   background-color: #ffffff !important;
   color: var(--text-primary) !important;
@@ -336,7 +316,6 @@ const toggleSidebar = () => {
   color: var(--text-primary) !important;
 }
 
-/* Sobrescribir el tema oscuro de Aura completamente */
 :deep(.p-sidebar.mobile-sidebar *) {
   color: var(--text-primary) !important;
 }
@@ -349,7 +328,6 @@ const toggleSidebar = () => {
   background-color: var(--primaryColor50) !important;
 }
 
-/* Ajustar colores de los elementos dentro del sidebar */
 .sidebar-header h3 {
   color: var(--text-primary) !important;
 }
@@ -371,7 +349,6 @@ const toggleSidebar = () => {
   background-color: var(--primaryColor50) !important;
 }
 
-/* Asegurar que el botón de cerrar sesión tenga el estilo correcto */
 :deep(.p-button-danger.p-button-outlined) {
   border-color: var(--primaryColor400) !important;
   color: var(--text-primary) !important;
@@ -382,7 +359,6 @@ const toggleSidebar = () => {
   border-color: var(--primaryColor600) !important;
 }
 
-/* Media queries para responsive */
 @media (max-width: 768px) {
   .desktop-menu, .auth-desktop {
     display: none;
