@@ -37,7 +37,7 @@ import Toolbar from "primevue/toolbar";
 import Toast from "primevue/toast";
 import SelectButton from "primevue/selectbutton";
 import Sidebar from "primevue/sidebar";
-
+import Carousel from 'primevue/carousel';
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -85,6 +85,7 @@ app.component('pv-button', Button)
     .component('pv-textarea', Textarea)
     .component('pv-toolbar', Toolbar)
     .component('pv-toast', Toast)
+    .component('pv-carousel', Carousel)
     .component('pv-sidebar', Sidebar);
 
 // Crea el router después de Pinia

@@ -1,6 +1,7 @@
 <script setup>
 import { RoleEnum } from "@/iam/model/role.enum.js";
 import NavBar from '@/shared/components/nav-bar.component.vue'
+import BookingCarousel from '@/booking/components/booking-carousel.component.vue';
 import { ref } from 'vue';
 
 // Función para generar informe (mock)
@@ -17,19 +18,6 @@ const username = ref('Usuario');
 
   <div class="home-container">
     <div class="home-content">
-      <!-- Logo y título -->
-      <div class="logo">
-        <img src="@/assets/images/icon_tavolo.svg" alt="Logo Tavolo">
-      </div>
-
-      <div class="welcome-text">
-        ¡Bienvenido a Tavolo!
-      </div>
-
-      <div class="home-title">
-        Panel Principal
-      </div>
-
       <!-- Solo visible para administradores -->
       <div v-rbac="[RoleEnum.ADMIN]" class="admin-panel">
         <h2 class="panel-title">Panel de administración</h2>
@@ -44,16 +32,8 @@ const username = ref('Usuario');
       </div>
 
       <!-- Contenido visible para todos -->
-      <div class="general-content">
-        <div class="content-card">
-          <h3>Información General</h3>
-          <p>Este contenido es visible para todos los usuarios. Explora las funcionalidades disponibles.</p>
-        </div>
-
-        <div class="navigation-options">
-          <pv-button class="action-button">Explorar Menú</pv-button>
-          <pv-button class="action-button secondary">Ver Promociones</pv-button>
-        </div>
+      <div v-rbac="[RoleEnum.USER]" class="general-content">
+        <BookingCarousel />
       </div>
     </div>
   </div>
@@ -63,42 +43,25 @@ const username = ref('Usuario');
 .home-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  align-items: flex-start; /* Cambiado de center a flex-start */
+  min-height: calc(100vh - 64px); /* Restar la altura del navbar */
+  padding-top: 64px; /* Espacio para el navbar */
   background-color: var(--background-color);
 }
 
 .home-content {
   width: 100%;
-  max-width: 800px;
-  padding: 32px;
+  max-width: none;
+  padding: 0 32px;
   text-align: center;
   background: var(--surface-color);
   border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(85vh - 64px); /* Altura mínima para contenido */
 }
 
-.logo {
-  margin-bottom: 6px;
-}
-
-.logo img {
-  height: 120px;
-  width: auto;
-}
-
-.welcome-text {
-  font-size: 14px;
-  color: var(--text-primary);
-  margin-bottom: 16px;
-}
-
-.home-title {
-  font-size: 36px;
-  color: var(--text-primary);
-  margin-bottom: 32px;
-  font-weight: 600;
-}
-
+/* Estilos para que cada sección ocupe el espacio apropiado */
 .admin-panel {
   background-color: var(--primaryColor50);
   border: 1px solid var(--primaryColor200);
@@ -106,68 +69,23 @@ const username = ref('Usuario');
   margin-bottom: 24px;
   border-radius: 8px;
   text-align: left;
-}
-
-.panel-title {
-  color: var(--text-primary);
-  font-size: 20px;
-  margin-top: 0;
-  margin-bottom: 12px;
+  flex-grow: 0; /* No crecer más de lo necesario */
 }
 
 .actions {
   display: flex;
   justify-content: center;
   margin-bottom: 24px;
-}
-
-.action-button {
-  min-width: 160px;
-  padding: 12px 32px;
-  background-color: var(--text-primary);
-  color: white;
-  border: none;
-  border-radius: 30px;
-  font-size: 16px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin: 0 8px;
-}
-
-.action-button.secondary {
-  background-color: var(--primaryColor300);
-}
-
-.action-button:hover {
-  background-color: var(--primaryColor600);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  flex-grow: 0; /* No crecer más de lo necesario */
 }
 
 .general-content {
   text-align: left;
   margin-top: 20px;
-}
-
-.content-card {
-  background-color: var(--primaryColor50);
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  border: 1px solid var(--primaryColor200);
-}
-
-.content-card h3 {
-  color: var(--text-primary);
-  margin-top: 0;
-}
-
-.navigation-options {
+  flex-grow: 1; /* Crecer para ocupar espacio disponible */
   display: flex;
-  justify-content: center;
-  margin-top: 24px;
-  flex-wrap: wrap;
-  gap: 12px;
+  flex-direction: column;
 }
+
+/* El resto de los estilos permanecen igual */
 </style>
