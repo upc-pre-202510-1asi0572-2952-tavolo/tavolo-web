@@ -1,6 +1,5 @@
 <script setup>
 import { RoleEnum } from "@/iam/model/role.enum.js";
-import NavBar from '@/shared/components/nav-bar.component.vue'
 import BookingCarousel from '@/booking/components/booking-carousel.component.vue';
 import { ref } from 'vue';
 
@@ -14,8 +13,6 @@ const username = ref('Usuario');
 </script>
 
 <template>
-  <NavBar/>
-
   <div class="home-container">
     <div class="home-content">
       <!-- Solo visible para administradores -->
@@ -24,8 +21,8 @@ const username = ref('Usuario');
         <p>Bienvenido al panel de administración. Aquí puedes gestionar configuraciones avanzadas.</p>
       </div>
 
-      <!-- Visible para administradores O supervisores -->
-      <div v-rbac="[RoleEnum.ADMIN, RoleEnum.SUPERVISOR]" class="actions">
+      <!-- Visible supervisores -->
+      <div v-rbac="[RoleEnum.SUPERVISOR]" class="actions">
         <pv-button @click="generateReport" class="action-button">
           Generar informe
         </pv-button>
