@@ -3,15 +3,21 @@ import { ref, onMounted, computed } from 'vue';
 import { useAuthenticationStore } from '@/iam/services/authentication.store';
 import { BookingService } from '@/booking/services/booking.service';
 import { Booking } from '@/booking/model/booking.entitie';
+import { useConfirm } from 'primevue/useconfirm';
+import { useToast } from 'primevue/usetoast';
 
 // Store y servicio
 const authStore = useAuthenticationStore();
 const bookingService = new BookingService();
+const confirm = useConfirm();
+const toast = useToast();
 
 // Estado
 const bookings = ref([]);
 const loading = ref(true);
 const error = ref(null);
+const detailsDialogVisible = ref(false);
+const selectedBooking = ref(null);
 const responsiveOptions = ref([
     {
         breakpoint: '1024px',
@@ -30,7 +36,6 @@ const responsiveOptions = ref([
     }
 ]);
 
-// Computa un mensaje amigable para mostrar
 const noBookingsMessage = computed(() => {
     if (loading.value) return "Cargando tus reservas...";
     if (error.value) return "No pudimos cargar tus reservas. Intenta de nuevo más tarde.";
@@ -38,7 +43,6 @@ const noBookingsMessage = computed(() => {
     return "";
 });
 
-// Formato de fecha y hora más legible
 const formatDate = (dateString) => {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('es-ES', options);
@@ -49,23 +53,70 @@ const formatTime = (timeString) => {
     return `${hours}:${minutes}`;
 };
 
+const showBookingDetails = (booking) => {
+    selectedBooking.value = booking;
+    detailsDialogVisible.value = true;
+};
+
+const deleteBooking = (id) => {
+    confirm.require({
+        message: '¿Estás seguro que deseas cancelar esta reserva?',
+        header: 'Confirmación de Cancelación',
+        icon: 'pi pi-exclamation-triangle',
+        acceptClass: 'p-button-danger',
+        accept: async () => {
+            try {
+                await bookingService.delete(id);
+                bookings.value = bookings.value.filter(booking => booking.id !== id);
+                
+                toast.add({
+                    severity: 'success',
+                    summary: 'Reserva Cancelada',
+                    detail: 'Tu reserva ha sido cancelada correctamente',
+                    life: 3000
+                });
+            } catch (error) {
+                console.error('Error al cancelar la reserva:', error);
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'No se pudo cancelar la reserva',
+                    life: 3000
+                });
+            }
+        }
+    });
+};
+
 // Cargar reservas del cliente autenticado
 onMounted(async () => {
     try {
         loading.value = true;
         const clientId = authStore.currentUserId;
+        
+        // Verificar si hay ID de cliente
+        if (!clientId) {
+            error.value = "No se pudo identificar al usuario";
+            loading.value = false;
+            return;
+        }
+        
         const response = await bookingService.getBookingsByClientId(clientId);
         
-        // Mapea la respuesta a objetos Booking
-        bookings.value = response.data.map(item => new Booking({
-            id: item.id,
-            clientId: item.clientId,
-            tableNumber: item.tableNumber,
-            headquarterId: item.headquarterId,
-            tableId: item.tableId,
-            bookingDate: item.bookingDate,
-            bookingSlots: item.bookingSlots || []
-        }));
+        // Verificar si hay datos
+        if (response.data && Array.isArray(response.data)) {
+            bookings.value = response.data.map(item => new Booking({
+                id: item.id,
+                clientId: item.clientId,
+                tableNumber: item.tableNumber,
+                headquarterId: item.headquarterId,
+                tableId: item.tableId,
+                bookingDate: item.bookingDate,
+                bookingSlots: item.bookingSlots || []
+            }));
+        } else {
+            bookings.value = [];
+        }
     } catch (err) {
         console.error('Error al cargar las reservas:', err);
         error.value = err.message || 'Error al cargar reservas';
@@ -76,6 +127,9 @@ onMounted(async () => {
 </script>
 
 <template>
+    <pv-toast />
+    <pv-confirm-dialog></pv-confirm-dialog>
+    
     <div class="booking-carousel-container">
         <h2 class="carousel-title">Mis Reservas</h2>
         
@@ -109,7 +163,7 @@ onMounted(async () => {
                             <i class="pi pi-table"></i>
                             <span>Mesa {{ slotProps.data.tableNumber }}</span>
                         </div>
-                        <!-- Nuevo elemento para mostrar el ID de la sede -->
+                        <!-- Elemento para mostrar el ID de la sede -->
                         <div class="booking-detail">
                             <i class="pi pi-building"></i>
                             <span>Sede ID: {{ slotProps.data.headquarterId }}</span>
@@ -124,13 +178,94 @@ onMounted(async () => {
                     </div>
                     <div class="booking-footer">
                         <pv-button icon="pi pi-eye" class="p-button-rounded p-button-text" 
-                                tooltip="Ver detalles" :tooltipOptions="{ position: 'top' }" />
+                                tooltip="Ver detalles" :tooltipOptions="{ position: 'top' }"
+                                @click="showBookingDetails(slotProps.data)" />
                         <pv-button icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" 
-                        tooltip="Cancelar reserva" :tooltipOptions="{ position: 'top' }" />
+                                tooltip="Cancelar reserva" :tooltipOptions="{ position: 'top' }"
+                                @click="deleteBooking(slotProps.data.id)" />
                     </div>
                 </div>
             </template>
         </pv-carousel>
+        
+        <!-- Diálogo de detalles de reserva -->
+        <pv-dialog 
+            v-model:visible="detailsDialogVisible" 
+            modal 
+            header="Detalles de la Reserva" 
+            :style="{ width: '90%', maxWidth: '500px' }"
+            :dismissableMask="true"
+        >
+            <div v-if="selectedBooking" class="booking-details-container">
+                <div class="details-section">
+                    <h3 class="details-title">
+                        <i class="pi pi-calendar"></i>
+                        Fecha y Hora
+                    </h3>
+                    <div class="details-content">
+                        <p class="detail-item">
+                            <span class="detail-label">Fecha:</span>
+                            <span class="detail-value">{{ formatDate(selectedBooking.bookingDate) }}</span>
+                        </p>
+                        <p class="detail-item" v-if="selectedBooking.bookingSlots && selectedBooking.bookingSlots.length > 0">
+                            <span class="detail-label">Hora:</span>
+                            <span class="detail-value">
+                                {{ formatTime(selectedBooking.bookingSlots[0].startTime) }} - 
+                                {{ formatTime(selectedBooking.bookingSlots[0].endTime) }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="details-section">
+                    <h3 class="details-title">
+                        <i class="pi pi-map-marker"></i>
+                        Ubicación
+                    </h3>
+                    <div class="details-content">
+                        <p class="detail-item">
+                            <span class="detail-label">Sede:</span>
+                            <span class="detail-value">Sede #{{ selectedBooking.headquarterId }}</span>
+                        </p>
+                        <p class="detail-item">
+                            <span class="detail-label">Mesa:</span>
+                            <span class="detail-value">{{ selectedBooking.tableNumber }}</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="details-section">
+                    <h3 class="details-title">
+                        <i class="pi pi-info-circle"></i>
+                        Información Adicional
+                    </h3>
+                    <div class="details-content">
+                        <p class="detail-item">
+                            <span class="detail-label">ID de Reserva:</span>
+                            <span class="detail-value">{{ selectedBooking.id }}</span>
+                        </p>
+                        <p class="detail-item">
+                            <span class="detail-label">ID de Cliente:</span>
+                            <span class="detail-value">{{ selectedBooking.clientId }}</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="details-actions">
+                    <pv-button 
+                        label="Cerrar" 
+                        icon="pi pi-times" 
+                        @click="detailsDialogVisible = false"
+                    />
+                    <pv-button 
+                        label="Cancelar Reserva" 
+                        icon="pi pi-trash" 
+                        class="p-button-danger" 
+                        @click="detailsDialogVisible = false; deleteBooking(selectedBooking.id)"
+                    />
+                </div>
+            </div>
+        </pv-dialog>
     </div>
 </template>
 
@@ -333,6 +468,82 @@ onMounted(async () => {
 :deep(.p-carousel-next:hover) {
     background-color: var(--primaryColor100) !important;
     color: var(--primaryColor800) !important;
+}
+
+/* Estilos para el diálogo de detalles */
+.booking-details-container {
+    padding: 1rem;
+}
+
+.details-section {
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--primaryColor100);
+    padding-bottom: 1rem;
+}
+
+.details-section:last-child {
+    border-bottom: none;
+}
+
+.details-title {
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+    color: var(--primaryColor700);
+    margin-bottom: 0.75rem;
+}
+
+.details-title i {
+    margin-right: 0.5rem;
+}
+
+.details-content {
+    padding-left: 1.5rem;
+}
+
+.detail-item {
+    display: flex;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.detail-label {
+    font-weight: 600;
+    width: 100px;
+    color: var(--text-secondary);
+}
+
+.detail-value {
+    flex: 1;
+    color: var(--text-primary);
+}
+
+.details-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+
+:deep(.p-dialog-header) {
+    background-color: var(--primaryColor50) !important;
+    color: var(--primaryColor700) !important;
+    border-bottom: 1px solid var(--primaryColor100) !important;
+}
+
+:deep(.p-dialog-content) {
+    background-color: var(--surface-color) !important;
+    color: var(--text-primary) !important;
+    padding: 1rem;
+}
+
+:deep(.p-dialog) {
+    background-color: var(--surface-color) !important;
+    color: var(--text-primary) !important;
+}
+
+:deep(.p-dialog-footer) {
+    background-color: var(--surface-color) !important;
+    border-top: 1px solid var(--primaryColor100) !important;
 }
 
 /* Media queries para responsividad */
