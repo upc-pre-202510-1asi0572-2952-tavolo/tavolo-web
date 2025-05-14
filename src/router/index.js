@@ -17,6 +17,24 @@ export function createAppRouter() {
                     requiresAuth: true
                 }
             },
+            {
+                path: '/headquarters',
+                name: 'reservation',
+                component: () => import('@/booking/pages/headquarter-principal.vue'),
+                meta: {
+                    title: 'Reservas',
+                    requiresAuth: true,
+                }
+            },
+            {
+                path: '/headquarters/:id/tables',
+                name: 'headquarter-tables',
+                component: () => import('@/booking/pages/headquarter-tables.vue'),
+                meta: {
+                    title: 'Mesas de la Sede',
+                    requiresAuth: true,
+                }
+            },
             { 
                 path: '/sign-in', 
                 name: 'sign-in', 
