@@ -3,6 +3,7 @@ import { RoleEnum } from "@/iam/model/role.enum.js";
 import NavBar from '@/shared/components/nav-bar.component.vue'
 import BookingCarousel from '@/booking/components/booking-carousel.component.vue';
 import { ref } from 'vue';
+import AssignedHeadquarterCard from "@/branching/components/assigned-headquarter-card.vue";
 
 // Función para generar informe (mock)
 const generateReport = () => {
@@ -25,10 +26,8 @@ const username = ref('Usuario');
       </div>
 
       <!-- Visible para administradores O supervisores -->
-      <div v-rbac="[RoleEnum.ADMIN, RoleEnum.SUPERVISOR]" class="actions">
-        <pv-button @click="generateReport" class="action-button">
-          Generar informe
-        </pv-button>
+      <div v-rbac="[RoleEnum.SUPERVISOR]" class="actions">
+        <AssignedHeadquarterCard></AssignedHeadquarterCard>
       </div>
 
       <!-- Contenido visible para todos -->
