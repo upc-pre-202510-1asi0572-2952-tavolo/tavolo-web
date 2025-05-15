@@ -11,6 +11,12 @@ const isAuthenticated = computed(() => {
 </script>
 
 <template>
+  <div class="app-container">
+    <NavBar v-if="isAuthenticated" />
+    <main class="main-content" :class="{ 'no-header': !isAuthenticated }">
+      <router-view />
+    </main>
+  </div>
   <NavBar v-if="isAuthenticated" />
   <main class="main-content" :class="{ 'no-header': !isAuthenticated }">
     <router-view />
@@ -18,5 +24,25 @@ const isAuthenticated = computed(() => {
 </template>
 
 <style scoped>
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  align-items: center; /* Center children horizontally */
+}
 
+.main-content {
+  font-family: 'Nunito', sans-serif;
+  padding-top: 7em;
+  flex: 1;
+  width: 90%;
+  max-width: 1200px; /* Optional: adds a maximum width */
+  margin: 0 auto; /* Centers the element horizontally */
+}
+
+.main-content.no-header {
+  padding-top: 0;
+}
 </style>

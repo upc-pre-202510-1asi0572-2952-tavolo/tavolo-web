@@ -113,8 +113,9 @@ export class BookingService {
         return http.get(`/tables/${tableId}/schedule?date=${formattedDate}`);
     }
 
-    async getHeadquarterBySupervisorId(supervisorId) {
-        return http.get(`/headquarters/supervisors/${supervisorId}`);
+    getHeadquarterBySupervisorId(supervisorId) {
+        return http.get(`/headquarters/supervisors/${supervisorId}`); // Remove leading slash
+
     }
 
     getUserById(userId) {
@@ -123,6 +124,4 @@ export class BookingService {
     getHeadquarterById(headquarterId) {
         return http.get(`/headquarters/${headquarterId}`);
     }
-
-
 }

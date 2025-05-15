@@ -1,9 +1,9 @@
 <script>
 import { ref, onMounted } from 'vue';
-import { BookingService } from '../services/booking.service.js';
 import { TableEntity } from '../model/table.entity.js';
 import BookingCardTable from './booking-card-table.vue';
 import { useAuthenticationStore } from "@/iam/services/authentication.store.js";
+import {BookingService} from "@/booking/services/booking.service.js";
 
 export default {
   name: "HeadquarterTableList",
@@ -25,7 +25,6 @@ export default {
     const headquarter = ref(null);
     const authStore = useAuthenticationStore();
 
-    // In headquarter-table-list.vue, modify the fetchHeadquarterTables function:
 
     const fetchHeadquarterTables = async () => {
       console.log('Starting fetchHeadquarterTables function');
@@ -33,7 +32,6 @@ export default {
         loading.value = true;
         console.log('Props headquarterId:', props.headquarterId);
 
-        // Get headquarter ID (from props or by supervisor)
         let hqId = props.headquarterId;
 
         if (!hqId) {
@@ -62,7 +60,7 @@ export default {
           }
         }
 
-        // Get tables for this headquarter
+
         console.log('Fetching tables for headquarter ID:', hqId);
         const tablesResponse = await bookingService.getTablesByHeadquarterId(hqId);
         console.log('Tables response:', tablesResponse);

@@ -1,6 +1,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue';
-import { BookingService } from '../services/booking.service.js';
+import { BookingService } from "@/booking/services/booking.service.js";
+
 
 export default {
   name: "BookingCardTable",

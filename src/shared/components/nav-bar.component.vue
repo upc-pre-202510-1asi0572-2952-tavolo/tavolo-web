@@ -74,7 +74,8 @@ const toggleSidebar = () => {
                 label="Ver Reservas"
                 icon="pi pi-calendar"
                 class="p-button-text nav-item"
-                @click="navigateTo('reservations')"
+                @click="navigateTo('supervisor-booking')"
+
             />
           </div>
 
@@ -146,7 +147,7 @@ const toggleSidebar = () => {
             <li @click="navigateTo('table-management')">
               <i class="pi pi-table mr-2"></i>Gestión de Mesas
             </li>
-            <li @click="navigateTo('reservations')">
+            <li @click="navigateTo('supervisor-booking')">
               <i class="pi pi-calendar mr-2"></i>Ver Reservas
             </li>
           </ul>
