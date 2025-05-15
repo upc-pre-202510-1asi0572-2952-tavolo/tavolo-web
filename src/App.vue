@@ -17,10 +17,6 @@ const isAuthenticated = computed(() => {
       <router-view />
     </main>
   </div>
-  <NavBar v-if="isAuthenticated" />
-  <main class="main-content" :class="{ 'no-header': !isAuthenticated }">
-    <router-view />
-  </main>
 </template>
 
 <style scoped>
