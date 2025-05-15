@@ -60,6 +60,7 @@ export default {
           }
         }
 
+
         console.log('Fetching tables for headquarter ID:', hqId);
         const tablesResponse = await bookingService.getTablesByHeadquarterId(hqId);
         console.log('Tables response:', tablesResponse);

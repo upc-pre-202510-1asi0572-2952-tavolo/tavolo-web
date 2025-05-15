@@ -1,5 +1,4 @@
 import http from "../../shared/services/http-common.js";
-
 /**
  * @class BookingService
  * @description Servicio para gestionar operaciones CRUD de reservas mediante peticiones HTTP
@@ -90,11 +89,11 @@ export class BookingService {
      */
     checkAvailability(date, startTime, endTime, headquarterId) {
         let url = `${this.resourceEndpoint}/availability?date=${date}&startTime=${startTime}&endTime=${endTime}`;
-        
+
         if (headquarterId) {
             url += `&headquarterId=${headquarterId}`;
         }
-        
+
         return http.get(url);
     }
 
@@ -116,6 +115,7 @@ export class BookingService {
 
     getHeadquarterBySupervisorId(supervisorId) {
         return http.get(`/headquarters/supervisors/${supervisorId}`); // Remove leading slash
+
     }
 
     getUserById(userId) {

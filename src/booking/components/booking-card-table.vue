@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { BookingService } from "@/booking/services/booking.service.js";
 
+
 export default {
   name: "BookingCardTable",
   props: {
