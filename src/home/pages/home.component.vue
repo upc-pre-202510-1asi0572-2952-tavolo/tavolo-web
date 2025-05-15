@@ -1,21 +1,40 @@
-<script setup>
+<script>
 import { RoleEnum } from "@/iam/model/role.enum.js";
-import NavBar from '@/shared/components/nav-bar.component.vue'
 import BookingCarousel from '@/booking/components/booking-carousel.component.vue';
-import { ref } from 'vue';
+import {onMounted, ref} from 'vue';
+import AssignedHeadquarterCard from "@/branching/components/assigned-headquarter-card.vue";
+import HeadquarterTableList from "@/booking/components/headquarter-table-list.vue";
 
-// Función para generar informe (mock)
-const generateReport = () => {
-  alert("Generando informe...");
-};
+export default {
+  name: "HomeComponent",
+  components: {
+    HeadquarterTableList,
+    BookingCarousel,
+    AssignedHeadquarterCard,
+  },
+  setup() {
+    // Define refs
+    const currentSupervisorId = ref(null);
+    const defaultViewType = 'table';
 
-// Datos de ejemplo
-const username = ref('Usuario');
+    onMounted(() => {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user && user.id && user.roles && user.roles.includes(RoleEnum.SUPERVISOR)) {
+        currentSupervisorId.value = user.id;
+      }
+    });
+
+    return {
+      RoleEnum,
+      currentSupervisorId,
+      defaultViewType
+    };
+  }
+}
+
 </script>
 
 <template>
-  <NavBar/>
-
   <div class="home-container">
     <div class="home-content">
       <!-- Solo visible para administradores -->
@@ -24,11 +43,10 @@ const username = ref('Usuario');
         <p>Bienvenido al panel de administración. Aquí puedes gestionar configuraciones avanzadas.</p>
       </div>
 
-      <!-- Visible para administradores O supervisores -->
-      <div v-rbac="[RoleEnum.ADMIN, RoleEnum.SUPERVISOR]" class="actions">
-        <pv-button @click="generateReport" class="action-button">
-          Generar informe
-        </pv-button>
+      <!-- Visible supervisores -->
+      <div v-rbac="[RoleEnum.SUPERVISOR]" class="actions">
+        <AssignedHeadquarterCard/>
+        <HeadquarterTableList/>
       </div>
 
       <!-- Contenido visible para todos -->
@@ -43,8 +61,8 @@ const username = ref('Usuario');
 .home-container {
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* Cambiado de center a flex-start */
-  min-height: calc(100vh - 64px); /* Restar la altura del navbar */
+  align-items: flex-start;
+  min-height: calc(100vh - 64px);
   padding-top: 64px; /* Espacio para el navbar */
   background-color: var(--background-color);
 }
@@ -58,10 +76,9 @@ const username = ref('Usuario');
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  min-height: calc(85vh - 64px); /* Altura mínima para contenido */
+  min-height: calc(85vh - 64px);
 }
 
-/* Estilos para que cada sección ocupe el espacio apropiado */
 .admin-panel {
   background-color: var(--primaryColor50);
   border: 1px solid var(--primaryColor200);
@@ -74,11 +91,13 @@ const username = ref('Usuario');
 
 .actions {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
   margin-bottom: 24px;
-  flex-grow: 0; /* No crecer más de lo necesario */
+  flex-grow: 1;
+  width: 100%;
 }
-
 .general-content {
   text-align: left;
   margin-top: 20px;
@@ -86,6 +105,4 @@ const username = ref('Usuario');
   display: flex;
   flex-direction: column;
 }
-
-/* El resto de los estilos permanecen igual */
 </style>
