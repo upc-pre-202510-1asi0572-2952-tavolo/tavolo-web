@@ -49,7 +49,17 @@ export function createAppRouter() {
             { 
                 path: '/', 
                 redirect: '/sign-in' 
-            }
+            },
+            {
+                path: '/supervisor-booking',
+                name: 'supervisor-booking',
+                component: () => import('../booking/pages/supervisor-booking.vue'),
+                meta: {
+                    title: 'Gestión de Reservas',
+                    requiresAuth: true,
+                    roles: ['SUPERVISOR']
+                }
+            },
         ]
     });
 
