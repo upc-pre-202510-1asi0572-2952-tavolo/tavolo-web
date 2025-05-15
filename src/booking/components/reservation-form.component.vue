@@ -1,8 +1,7 @@
-<!-- src/booking/components/reservation-form.component.vue -->
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import { BookingService } from '../services/booking.service.js';
-import { TablesService } from "../services/tables.service.js";
+import {ref, computed, onMounted, watch} from 'vue';
+import {BookingService} from '../services/booking.service.js';
+import {TablesService} from "../services/tables.service.js";
 
 const props = defineProps({
   tableInfo: {
@@ -38,8 +37,6 @@ const tableName = computed(() => {
 const loadTimeSlots = async () => {
   if (!props.tableInfo?.tableId || !formattedDate.value) return;
 
-  console.log(`Cargando slots para mesa ${props.tableInfo.tableId} en fecha ${formattedDate.value}`);
-
   loadingSlots.value = true;
   error.value = null;
   selectedSlotId.value = null;
@@ -50,7 +47,7 @@ const loadTimeSlots = async () => {
     if (response && response.data) {
       timeSlots.value = response.data.map(slot => ({
         id: slot.id,
-        label: `${slot.startTime} - ${slot.endTime}`,
+        label: `${slot.startTime}`,
         available: slot.status.toLowerCase() === 'available'
       }));
     } else {
@@ -65,6 +62,20 @@ const loadTimeSlots = async () => {
   }
 };
 
+// Actualización automática de horarios cada 30 segundos
+let refreshInterval;
+const startAutoRefresh = () => {
+  refreshInterval = setInterval(() => {
+    if (props.visible && !success.value) {
+      loadTimeSlots();
+    }
+  }, 30000);
+};
+
+const stopAutoRefresh = () => {
+  clearInterval(refreshInterval);
+};
+
 const handleDateChange = () => {
   selectedSlotId.value = null;
   loadTimeSlots();
@@ -75,21 +86,6 @@ const selectTimeSlot = (slotId) => {
 };
 
 const validateForm = () => {
-  if (!customerName.value.trim()) {
-    error.value = "Por favor ingrese su nombre.";
-    return false;
-  }
-
-  if (!customerPhone.value.trim()) {
-    error.value = "Por favor ingrese su número de teléfono.";
-    return false;
-  }
-
-  if (!customerEmail.value.trim() || !customerEmail.value.includes('@')) {
-    error.value = "Por favor ingrese un correo electrónico válido.";
-    return false;
-  }
-
   if (!selectedSlotId.value) {
     error.value = "Por favor seleccione un horario para su reserva.";
     return false;
@@ -105,17 +101,14 @@ const submitReservation = async () => {
   error.value = null;
 
   try {
-    // El valor clientId debería venir del usuario autenticado
     const reservationData = {
       clientId: 1, // Usar ID del cliente real
       tableId: props.tableInfo.tableId,
       bookingDate: formattedDate.value,
-      slotIds: [selectedSlotId.value] // Asegúrate de que sea un array
+      slotIds: [selectedSlotId.value]
     };
 
-    console.log('Enviando datos de reserva:', reservationData);
     const response = await bookingService.create(reservationData);
-    console.log('Reserva creada con éxito:', response);
 
     success.value = true;
     emit('success', reservationData);
@@ -130,24 +123,37 @@ const submitReservation = async () => {
 const closeModal = () => {
   if (!loading.value) {
     emit('close');
+    stopAutoRefresh();
     setTimeout(() => {
       success.value = false;
       error.value = null;
-      customerName.value = '';
-      customerPhone.value = '';
-      customerEmail.value = '';
       selectedSlotId.value = null;
     }, 300);
   }
 };
 
-// Cargar slots cuando se monta el componente
 onMounted(() => {
   loadTimeSlots();
+  startAutoRefresh();
 });
 
-// Vigilar cambios en la fecha
+// Vigilar cambios en la fecha y visibilidad
 watch(formattedDate, handleDateChange);
+watch(() => props.visible, (isVisible) => {
+  if (isVisible) {
+    loadTimeSlots();
+    startAutoRefresh();
+  } else {
+    stopAutoRefresh();
+  }
+});
+
+// Limpiar intervalo al desmontar
+onMounted(() => {
+  return () => {
+    stopAutoRefresh();
+  };
+});
 </script>
 
 <template>
@@ -158,32 +164,66 @@ watch(formattedDate, handleDateChange);
         <button class="close-button" @click="closeModal">&times;</button>
       </div>
 
-      <div class="modal-body">
-        <div v-if="success" class="success-message">
-          <i class="pi pi-check-circle"></i>
-          <h3>¡Reserva confirmada!</h3>
-          <p><strong>Mesa:</strong> {{ tableName }}</p>
-          <p><strong>Fecha:</strong> {{ formattedDate }}</p>
-          <p><strong>Horario:</strong> {{ timeSlots.find(slot => slot.id === selectedSlotId)?.label }}</p>
-          <button class="btn-reserve" @click="closeModal">Cerrar</button>
+      <div v-if="success" class="success-message">
+        <i class="pi pi-check-circle"></i>
+        <h3>¡Reserva confirmada!</h3>
+        <div class="detail-item">
+          <div class="detail-icon">
+            <i class="pi pi-table"></i>
+          </div>
+          <div class="detail-text">
+            <span class="detail-label">Mesa:</span>
+            <span class="detail-value">{{ tableName }}</span>
+          </div>
         </div>
 
-        <div v-else>
+        <div class="detail-item">
+          <div class="detail-icon">
+            <i class="pi pi-users"></i>
+          </div>
+          <div class="detail-text">
+            <span class="detail-label">Capacidad:</span>
+            <span class="detail-value">{{ props.tableInfo?.seats }} personas</span>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-icon">
+            <i class="pi pi-calendar"></i>
+          </div>
+          <div class="detail-text">
+            <span class="detail-label">Fecha:</span>
+            <span class="detail-value">{{ formattedDate }}</span>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-icon">
+            <i class="pi pi-clock"></i>
+          </div>
+          <div class="detail-text">
+            <span class="detail-label">Horario:</span>
+            <span class="detail-value">{{ timeSlots.find(slot => slot.id === selectedSlotId)?.label }}</span>
+          </div>
+        </div>
+
+        <button class="btn-success" @click="closeModal">
+          <i class="pi pi-check"></i> Aceptar
+        </button>
+      </div>
+
+      <div v-else class="compact-form">
+        <div class="form-row">
           <div class="form-group">
-            <label><strong>Mesa:</strong></label>
-            <div class="info-value">{{ tableName }}</div>
+            <label><strong>Mesa:</strong> {{ tableName }}</label>
           </div>
 
           <div class="form-group">
-            <label><strong>Capacidad:</strong></label>
-            <div class="info-value">{{ props.tableInfo?.seats }} personas</div>
+            <label><strong>Capacidad:</strong> {{ props.tableInfo?.seats }} personas</label>
           </div>
+        </div>
 
-          <div class="form-group" v-if="props.tableInfo?.zone">
-            <label><strong>Zona:</strong></label>
-            <div class="info-value">{{ props.tableInfo.zone }}</div>
-          </div>
-
+        <div class="form-date">
           <div class="form-group">
             <label for="date">Fecha:</label>
             <input
@@ -191,67 +231,59 @@ watch(formattedDate, handleDateChange);
                 id="date"
                 v-model="formattedDate"
                 :min="new Date().toISOString().split('T')[0]"
+                class="date-picker"
             />
           </div>
+        </div>
 
-          <div class="form-group">
-            <label>Horario disponible:</label>
+        <div class="form-group slots-section">
+          <label>Horarios disponibles:</label>
 
-            <div v-if="loadingSlots" class="loading-slots">
-              Cargando horarios disponibles...
-            </div>
+          <div v-if="loadingSlots" class="loading-slots">
+            <i class="pi pi-spin pi-spinner"></i> Cargando horarios...
+          </div>
 
-            <div v-else-if="timeSlots.length === 0 && !error" class="no-slots-message">
-              No hay horarios disponibles para la fecha seleccionada.
-            </div>
+          <div v-else-if="timeSlots.length === 0 && !error" class="no-slots-message">
+            <i class="pi pi-calendar-times"></i> No hay horarios disponibles
+          </div>
 
-            <div v-else class="time-slots-container">
-              <div
-                  v-for="slot in timeSlots"
-                  :key="slot.id"
-                  :class="{
+          <div v-else class="time-slots-container">
+            <div
+                v-for="slot in timeSlots"
+                :key="slot.id"
+                :class="{
                     'time-slot': true,
+                    'slot-available': slot.available && selectedSlotId !== slot.id,
+                    'slot-unavailable': !slot.available,
                     'selected': selectedSlotId === slot.id,
-                    'unavailable': !slot.available
                   }"
-                  @click="slot.available && selectTimeSlot(slot.id)"
-              >
-                {{ slot.label }}
-              </div>
+                @click="slot.available && selectTimeSlot(slot.id)"
+            >
+              <span class="slot-time">{{ slot.label }}</span>
+              <span class="slot-status">
+                  <i v-if="slot.available" ></i>
+                  <i v-else class="pi pi-times-circle"></i>
+                </span>
             </div>
           </div>
+        </div>
 
-          <div class="form-group">
-            <label for="name">Nombre:</label>
-            <input type="text" id="name" v-model="customerName" />
-          </div>
+        <div v-if="error" class="error-message">
+          <i class="pi pi-exclamation-triangle"></i> {{ error }}
+        </div>
 
-          <div class="form-group">
-            <label for="phone">Teléfono:</label>
-            <input type="tel" id="phone" v-model="customerPhone" />
-          </div>
-
-          <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" id="email" v-model="customerEmail" />
-          </div>
-
-          <div v-if="error" class="error-message">
-            {{ error }}
-          </div>
-
-          <div class="form-actions">
-            <button class="btn-cancel" @click="closeModal" :disabled="loading">
-              Cancelar
-            </button>
-            <button
-                class="btn-reserve"
-                @click="submitReservation"
-                :disabled="loading || timeSlots.length === 0"
-            >
-              {{ loading ? 'Procesando...' : 'Confirmar Reserva' }}
-            </button>
-          </div>
+        <div class="form-actions">
+          <button class="btn-cancel" @click="closeModal" :disabled="loading">
+            <i class="pi pi-times"></i> Cancelar
+          </button>
+          <button
+              class="btn-reserve"
+              @click="submitReservation"
+              :disabled="loading || !selectedSlotId || timeSlots.length === 0"
+          >
+            <i class="pi" :class="loading ? 'pi-spinner pi-spin' : 'pi-check'"></i>
+            {{ loading ? 'Procesando...' : 'Confirmar' }}
+          </button>
         </div>
       </div>
     </div>
@@ -265,35 +297,54 @@ watch(formattedDate, handleDateChange);
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(57, 43, 27, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(3px);
+  transition: all 0.3s ease;
 }
 
 .modal-container {
   background-color: white;
-  border-radius: 8px;
+  border-radius: 12px;
+  padding: 18px;
   width: 100%;
-  max-width: 500px;
-  max-height: 90vh;
+  max-width: 420px;
+  max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  transform: translateY(0);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  animation: modal-appear 0.3s ease-out;
+}
+
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #eee;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #EEE6E0;
+  padding-bottom: 12px;
 }
 
 .modal-header h2 {
   margin: 0;
-  font-size: 1.5rem;
-  color: #333;
+  font-size: 1.25rem;
+  color: #392B1B;
+  font-weight: 600;
 }
 
 .close-button {
@@ -301,72 +352,140 @@ watch(formattedDate, handleDateChange);
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #666;
+  color: #563F25;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
 }
 
-.modal-body {
-  padding: 20px;
+.close-button:hover {
+  background-color: rgba(220, 200, 185, 0.3);
+}
+
+/* Estilos para el formulario compacto */
+.compact-form {
+  font-size: 0.95rem;
+}
+
+.form-row {
+  justify-content: space-between;
+  border-radius: 8px;
+  margin-bottom: 15px;
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .form-group label {
-  display: block;
-  margin-bottom: 6px;
   font-weight: 500;
-  color: #555;
+  color: #392B1B;
 }
 
-.info-value {
-  padding: 8px 0;
-  color: #333;
-  font-weight: 500;
+.form-date {
+  margin-bottom: 15px;
 }
 
-input[type="date"],
-input[type="text"],
-input[type="tel"],
-input[type="email"] {
+.date-picker {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: 10px 12px;
+  border: 1px solid #DCC8B9;
+  border-radius: 6px;
+  color: #392B1B;
+  font-size: 0.95rem;
+  background-color: #FFFFFF;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.date-picker:focus {
+  border-color: #AC8362;
+  box-shadow: 0 0 0 3px rgba(172, 131, 98, 0.15);
+  outline: none;
+}
+
+.slots-section {
+  margin-bottom: 15px;
 }
 
 .time-slots-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .time-slot {
   padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  text-align: center;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.time-slot:hover:not(.unavailable) {
-  background-color: #f5f5f5;
-}
-
-.time-slot.selected {
-  background-color: #4a90e2;
+.slot-available {
+  background-color: #4CAF50;
   color: white;
-  border-color: #4a90e2;
+  border: none;
 }
 
-.time-slot.unavailable {
-  background-color: #f5f5f5;
-  color: #aaa;
+.slot-available:hover {
+  background-color: #43A047;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+.slot-unavailable {
+  background-color: #F44336;
+  color: white;
   cursor: not-allowed;
-  text-decoration: line-through;
+  border: none;
+  opacity: 0.8;
+}
+
+.selected {
+  background-color: #2a4a29 !important;
+  color: white;
+  border: none !important;
+  box-shadow: 0 0 0 2px rgba(138, 114, 74, 0.3), 0 3px 8px rgba(0,0,0,0.2) !important;
+  transform: translateY(-2px);
+  position: relative;
+}
+
+.selected::after {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background-color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.slot-time {
+  font-weight: 600;
+}
+
+.slot-status .pi-check-circle {
+  color: white;
+  font-size: 0.85rem;
+}
+
+.slot-status .pi-times-circle {
+  color: white;
+  font-size: 0.85rem;
 }
 
 .form-actions {
@@ -374,86 +493,233 @@ input[type="email"] {
   justify-content: flex-end;
   gap: 10px;
   margin-top: 20px;
+  border-top: 1px solid #EEE6E0;
+  padding-top: 15px;
 }
 
 .btn-cancel {
-  padding: 10px 20px;
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 10px 16px;
+  background-color: white;
+  color: #563F25;
+  border: 1px solid #DCC8B9;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  background-color: #FFF8F3;
+  border-color: #AC8362;
 }
 
 .btn-reserve {
-  padding: 10px 20px;
-  background-color: #4a90e2;
+  padding: 10px 16px;
+  background-color: #AC8362;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(172, 131, 98, 0.3);
+}
+
+.btn-reserve:hover:not(:disabled) {
+  background-color: #8A724A;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(138, 114, 74, 0.4);
 }
 
 .btn-reserve:disabled {
-  background-color: #cccccc;
+  background-color: #DCC8B9;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .error-message {
-  color: #e74c3c;
-  margin-top: 10px;
+  color: #D32F2F;
+  margin-top: 12px;
   padding: 10px;
-  background-color: #fde2e2;
-  border-radius: 4px;
+  background-color: #FFEBEE;
+  border-radius: 6px;
+  border-left: 3px solid #F44336;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  animation: errorAppear 0.3s ease-in;
+}
+
+@keyframes errorAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.no-slots-message {
+  padding: 15px;
+  background-color: #FFF8F3;
+  border-radius: 6px;
+  margin: 10px 0;
+  color: #563F25;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  border: 1px dashed #DCC8B9;
+}
+
+.loading-slots {
+  text-align: center;
+  padding: 20px;
+  color: #563F25;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.loading-slots .pi-spinner {
+  animation: spin 1.5s linear infinite;
+  font-size: 1.2rem;
+  color: #AC8362;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .success-message {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
-  color: #2ecc71;
+  padding: 20px 15px;
   text-align: center;
+  animation: successAppear 0.5s ease-out;
+}
+
+@keyframes successAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .success-message i {
   font-size: 3rem;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  color: #43A047;
+  animation: checkmark 0.8s ease-in-out;
+}
+
+@keyframes checkmark {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .success-message h3 {
-  color: #2ecc71;
-  margin-bottom: 10px;
+  color: #392B1B;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
 }
 
-.success-message p {
-  margin: 5px 0;
-  color: #333;
+.detail-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #EEE6E0;
+  width: 100%;
 }
 
-.success-message button {
+.detail-icon {
+  width: 40px;
+  height: 40px;
+  background-color: #FAF7F4;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  color: #8A724A;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.detail-text {
+  text-align: left;
+  flex-grow: 1;
+}
+
+.detail-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #563F25;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-weight: 600;
+  color: #392B1B;
+  font-size: 1.05rem;
+}
+
+.btn-success {
   margin-top: 20px;
+  padding: 12px 30px;
+  background-color: #43A047;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 6px rgba(67, 160, 71, 0.3);
+  transition: all 0.2s;
 }
 
-.no-slots-message {
-  padding: 15px;
-  background-color: #f8f8f8;
-  border-radius: 4px;
-  margin-bottom: 16px;
-  color: #666;
-  text-align: center;
-}
-
-.loading-slots {
-  text-align: center;
-  padding: 15px;
-  color: #666;
+.btn-success:hover {
+  background-color: #388E3C;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(67, 160, 71, 0.4);
 }
 
 @media (max-width: 576px) {
   .time-slots-container {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .modal-container {
+    max-width: 90%;
+    margin: 0 15px;
   }
 }
 </style>

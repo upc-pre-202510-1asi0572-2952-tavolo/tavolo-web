@@ -50,10 +50,10 @@ const getSchedule = () => {
       </div>
       <div class="card-actions">
         <button class="btn btn-tables" @click="navigateToTables">
-          <span class="btn-icon">🍽️</span> Ver mesas
+          <i class="pi pi-list"></i> Ver mesas
         </button>
         <button class="btn btn-map" @click="navigateToMap">
-          <span class="btn-icon">📍</span> Ver en Mapa
+          <i class="pi pi-map-marker"></i> Ver en Mapa
         </button>
       </div>
     </div>
