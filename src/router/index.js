@@ -3,6 +3,7 @@ import SignInComponent from "../iam/pages/sign-in.component.vue";
 import SignUpComponent from "../iam/pages/sign-up.component.vue";
 import { authenticationGuard } from "../iam/services/authentication.guard.js";
 import { authorizationGuard } from "../iam/services/authentication.authorization.js";
+import { RoleEnum } from "../iam/model/role.enum";
 
 export function createAppRouter() {
     const router = createRouter({
@@ -54,9 +55,29 @@ export function createAppRouter() {
                 meta: { title: 'Acceso Denegado' }
             },
             { 
+                path: '/tables', 
+                name: 'table-management',
+                component: () => import('../tables/pages/TablesManagement.vue'),
+                meta: { 
+                    title: 'Gestión de Mesas',
+                    requiresAuth: true,
+                    roles: [RoleEnum.ADMIN, RoleEnum.SUPERVISOR]
+                }
+            },
+            { 
                 path: '/', 
                 redirect: '/sign-in' 
-            }
+            },
+            {
+                path: '/supervisor-booking',
+                name: 'supervisor-booking',
+                component: () => import('../booking/pages/supervisor-booking.vue'),
+                meta: {
+                    title: 'Gestión de Reservas',
+                    requiresAuth: true,
+                    roles: ['SUPERVISOR']
+                }
+            },
         ]
     });
 

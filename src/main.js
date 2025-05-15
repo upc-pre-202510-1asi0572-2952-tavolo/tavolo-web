@@ -1,4 +1,6 @@
 import './assets/main.css'
+import './assets/styles/variables.css'
+import './assets/styles/prime-overrides.css'
 import { setupInterceptors } from './shared/config/config-interceptors.js'; // Importa setupInterceptors
 import RbacDirective from './iam/directives/rbac.directive.js';
 

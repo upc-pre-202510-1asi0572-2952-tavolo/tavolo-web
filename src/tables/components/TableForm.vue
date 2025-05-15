@@ -1,0 +1,226 @@
+<script setup>
+import { ref, defineEmits } from 'vue';
+import { Table } from '../model/table.entitie';
+
+const emit = defineEmits(['save', 'cancel']);
+
+// Datos del formulario
+const tableNumber = ref('');
+const seats = ref('');
+const zone = ref('Sala principal');
+const headquarterId = ref(1); // Valor por defecto para la sede
+
+// Zonas disponibles
+const zones = [
+  { name: 'Sala principal', value: 'Sala principal' },
+  { name: 'Terraza', value: 'Terraza' },
+  { name: 'Ventana', value: 'Ventana' }
+];
+
+// Validación de formulario
+const errors = ref({});
+
+const validateForm = () => {
+  errors.value = {};
+  let isValid = true;
+
+  if (!tableNumber.value) {
+    errors.value.tableNumber = 'El número de mesa es obligatorio';
+    isValid = false;
+  } else if (isNaN(tableNumber.value) || tableNumber.value <= 0) {
+    errors.value.tableNumber = 'El número de mesa debe ser un número positivo';
+    isValid = false;
+  }
+
+  if (!seats.value) {
+    errors.value.seats = 'La capacidad es obligatoria';
+    isValid = false;
+  } else if (isNaN(seats.value) || seats.value <= 0) {
+    errors.value.seats = 'La capacidad debe ser un número positivo';
+    isValid = false;
+  }
+
+  return isValid;
+};
+
+const handleSubmit = () => {
+  if (validateForm()) {
+    const newTable = new Table(
+      null,
+      Number(headquarterId.value),
+      Number(tableNumber.value),
+      Number(seats.value),
+      'AVAILABLE',
+      zone.value
+    );
+    
+    emit('save', newTable);
+    resetForm();
+  }
+};
+
+const resetForm = () => {
+  tableNumber.value = '';
+  seats.value = '';
+  zone.value = 'Sala principal';
+  errors.value = {};
+};
+
+const handleCancel = () => {
+  resetForm();
+  emit('cancel');
+};
+</script>
+
+<template>
+  <div class="dialog-container">
+    <div class="dialog-title">Agregar mesa</div>
+    
+    <form @submit.prevent="handleSubmit">
+      <div class="form-group">
+        <label for="tableNumber">Número de mesa</label>
+        <input
+          id="tableNumber"
+          v-model="tableNumber"
+          type="number"
+          min="1"
+          :class="{ 'error-input': errors.tableNumber }"
+          placeholder="Ejemplo: 13"
+        />
+        <small v-if="errors.tableNumber" class="error-message">{{ errors.tableNumber }}</small>
+      </div>
+
+      <div class="form-group">
+        <label for="seats">Capacidad (personas)</label>
+        <input
+          id="seats"
+          v-model="seats"
+          type="number"
+          min="1"
+          :class="{ 'error-input': errors.seats }"
+          placeholder="Ejemplo: 4"
+        />
+        <small v-if="errors.seats" class="error-message">{{ errors.seats }}</small>
+      </div>
+
+      <div class="form-group">
+        <label for="zone">Zona</label>
+        <select id="zone" v-model="zone" class="custom-select">
+          <option v-for="option in zones" :key="option.value" :value="option.value">
+            {{ option.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="button-container">
+        <button type="button" class="secondary" @click="handleCancel">Cancelar</button>
+        <button type="submit">Agregar</button>
+      </div>
+    </form>
+  </div>
+</template>
+
+<style scoped>
+.dialog-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 28px;
+  width: 100%;
+  max-width: 380px;
+  color: #333333;
+}
+
+.dialog-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 14px;
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+input, .custom-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 15px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  color: #333;
+  background-color: white;
+}
+
+input:focus, .custom-select:focus {
+  border-color: #a67c52;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(166, 124, 82, 0.2);
+}
+
+.custom-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a67c52' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+.error-input {
+  border-color: #e74c3c;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+  text-align: left;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 28px;
+}
+
+button {
+  padding: 12px 24px;
+  background-color: #a67c52;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #8a653e;
+}
+
+button.secondary {
+  background-color: #f5f5f5;
+  color: #333;
+  margin-right: 10px;
+}
+
+button.secondary:hover {
+  background-color: #e5e5e5;
+}
+</style> 
