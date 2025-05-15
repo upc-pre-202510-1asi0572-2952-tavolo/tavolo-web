@@ -14,6 +14,7 @@ const headquarter = ref(null);
 const tables = ref([]);
 const loading = ref(true);
 const error = ref(null);
+const noTablesFound = ref(false);
 
 // Filtros
 const capacityFilter = ref('all');
@@ -34,9 +35,21 @@ onMounted(async () => {
     const headquarterResponse = await headquartersService.getHeadquarterById(headquarterId.value);
     headquarter.value = headquarterResponse;
 
-    // Cargar mesas de la sede
-    const tablesResponse = await tablesService.getTablesByHeadquarter(headquarterId.value);
-    tables.value = tablesResponse.data;
+    try {
+      // Cargar mesas de la sede
+      const tablesResponse = await tablesService.getTablesByHeadquarter(headquarterId.value);
+      tables.value = tablesResponse.data || [];
+
+      if (tables.value.length === 0) {
+        noTablesFound.value = true;
+      }
+    } catch (tableError) {
+      if (tableError.response && tableError.response.status === 404) {
+        noTablesFound.value = true;
+      } else {
+        throw tableError;
+      }
+    }
 
     loading.value = false;
   } catch (err) {
@@ -94,28 +107,38 @@ const refreshTables = async () => {
 <template>
   <div class="headquarter-tables-page">
     <div class="loading" v-if="loading">
-      <p>Cargando información...</p>
-    </div>
-
-    <div class="error-message" v-else-if="error">
-      <p>{{ error }}</p>
+      <div class="loading-spinner">
+        <i class="pi pi-spin pi-spinner"></i>
+        <p>Cargando información...</p>
+      </div>
     </div>
 
     <div class="headquarter-content" v-else>
-      <div class="back-button">
-        <router-link to="/headquarters" class="btn btn-text">
-          <i class="pi pi-arrow-left"></i> Volver a sedes
-        </router-link>
-      </div>
+      <router-link to="/headquarters" class="btn-back-minimalista">
+        <i class="pi pi-arrow-left"></i>
+        <span>Volver a sedes</span>
+      </router-link>
 
-      <div class="headquarter-header">
+      <div class="headquarter-header" v-if="headquarter">
         <h1>{{ headquarter.name }} - Mesas</h1>
         <p class="headquarter-address">
           <i class="pi pi-map-marker"></i> {{ headquartersService.getFullAddress(headquarter) }}
         </p>
       </div>
 
-      <div class="main-content">
+      <div v-if="noTablesFound" class="no-tables-container">
+        <div class="no-tables-content">
+          <i class="pi pi-table no-tables-icon"></i>
+          <h2>No hay mesas registradas</h2>
+          <p>Esta sede aún no tiene mesas disponibles para reservar.</p>
+          <router-link to="/headquarters" class="btn-back-to-headquarters">
+            <i class="pi pi-building"></i>
+            Ver otras sedes
+          </router-link>
+        </div>
+      </div>
+
+      <div class="main-content" v-else-if="!error">
         <!-- Panel de filtros (lado izquierdo) -->
         <div class="filters-panel">
           <div class="filters-header">
@@ -165,7 +188,7 @@ const refreshTables = async () => {
                 headquarter: headquarter
               })"
                   :disabled="table.status?.toLowerCase() !== 'available'">
-                <i class="pi pi-calendar-plus"></i> Reservar
+                Reservar
               </button>
             </div>
           </div>
@@ -181,7 +204,6 @@ const refreshTables = async () => {
     </div>
   </div>
 </template>
-
 <style scoped>
 .headquarter-tables-page {
   max-width: 1200px;
@@ -189,33 +211,155 @@ const refreshTables = async () => {
   padding: 20px;
 }
 
-.loading, .error-message {
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.loading-spinner {
   text-align: center;
-  padding: 30px;
-  color: #563F25;
+  color: #8A724A;
 }
 
-.error-message {
-  color: #D59969;
+.loading-spinner i {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  animation: spin 1s infinite linear;
 }
 
-.back-button {
-  margin-bottom: 20px;
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-.btn-text {
+.btn-back-minimalista {
+  display: inline-flex;
+  align-items: center;
   text-decoration: none;
-  color: #AC8362;
+  color: #563F25;
   font-weight: 500;
+  font-size: 0.95rem;
+  margin-bottom: 25px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  background-color: #FAF7F4;
+  border: 1px solid #DCC8B9;
+  box-shadow: 0 2px 4px rgba(57, 43, 27, 0.08);
+  transition: all 0.2s ease;
+}
+
+.btn-back-minimalista:hover {
+  background-color: #EEE6E0;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(57, 43, 27, 0.12);
+}
+
+.btn-back-minimalista i {
+  margin-right: 8px;
+  font-size: 1rem;
+  color: #8A724A;
+}
+
+/* Estilos para la pantalla de no hay mesas */
+.no-tables-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.no-tables-content {
+  background-color: #FFF8F3;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  max-width: 500px;
+  box-shadow: 0 4px 15px rgba(57, 43, 27, 0.08);
+  border: 1px solid #EEE6E0;
+}
+
+.no-tables-icon {
+  font-size: 4rem;
+  color: #DCC8B9;
+  margin-bottom: 20px;
+  opacity: 0.8;
+}
+
+.no-tables-content h2 {
+  color: #392B1B;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+}
+
+.no-tables-content p {
+  color: #563F25;
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+}
+
+.btn-back-to-headquarters {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 6px;
+  background-color: #AC8362;
+  border: none;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  box-shadow: 0 3px 6px rgba(172, 131, 98, 0.3);
+}
+
+.btn-back-to-headquarters:hover {
+  background-color: #8A724A;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(172, 131, 98, 0.4);
+}
+
+.btn-back-to-headquarters i {
+  margin-right: 8px;
+}
+
+/* Resto de estilos... */
+.headquarter-header {
+  margin-bottom: 30px;
+  align-items: center;
+  justify-content: center;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #392B1B;
+  margin-bottom: 10px;
+}
+
+.headquarter-address {
+  color: #563F25;
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
   gap: 5px;
 }
 
+.main-content {
+  display: flex;
+  gap: 30px;
+}
+
 .headquarter-header {
   margin-bottom: 30px;
-  border-bottom: 2px solid #DCC8B9;
-  padding-bottom: 15px;
+  align-items: center;
+  justify-content: center;
 }
 
 h1 {
@@ -315,7 +459,7 @@ h1 {
 }
 
 .table-card {
-  background-color: white;
+  background-color: #FFF8F3;
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(57, 43, 27, 0.1);
@@ -329,12 +473,7 @@ h1 {
   box-shadow: 0 5px 15px rgba(57, 43, 27, 0.2);
 }
 
-.table-card.available {
-  border-top: 4px solid #8A724A;
-}
-
 .table-card.occupied {
-  border-top: 4px solid #D59969;
   opacity: 0.7;
 }
 
@@ -405,6 +544,220 @@ h1 {
   background-color: #FFF8F3;
   border-radius: 8px;
   color: #563F25;
+}
+.back-button {
+  margin-bottom: 25px;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #563F25;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: #FAF7F4;
+  border: 1px solid #DCC8B9;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 4px rgba(57, 43, 27, 0.08);
+}
+
+.btn-back:hover {
+  background-color: #EEE6E0;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(57, 43, 27, 0.15);
+}
+
+.btn-back:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(57, 43, 27, 0.15);
+}
+
+.btn-back-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: #FFF;
+  border-radius: 50%;
+  margin-right: 10px;
+  color: #8A724A;
+  box-shadow: 0 1px 3px rgba(138, 114, 74, 0.15);
+}
+
+.btn-back-text {
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}
+
+.btn-back-minimalista {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #563F25;
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+  margin-top: 20px;
+
+  padding: 10px 16px;
+  border-radius: 6px;
+  background-color: #FAF7F4;
+  border: 1px solid #DCC8B9;
+  box-shadow: 0 2px 4px rgba(57, 43, 27, 0.08);
+  transition: all 0.2s ease;
+}
+
+.btn-back-minimalista:hover {
+  background-color: #EEE6E0;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(57, 43, 27, 0.12);
+}
+
+.btn-back-minimalista i {
+  margin-right: 8px;
+  font-size: 1rem;
+  color: #8A724A;
+}
+
+
+.back-button {
+   margin-bottom: 25px;
+ }
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #563F25;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: #FAF7F4;
+  border: 1px solid #DCC8B9;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 4px rgba(57, 43, 27, 0.08);
+}
+
+.btn-back:hover {
+  background-color: #EEE6E0;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(57, 43, 27, 0.15);
+}
+
+.btn-back:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(57, 43, 27, 0.15);
+}
+
+.btn-back-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: #FFF;
+  border-radius: 50%;
+  margin-right: 10px;
+  color: #8A724A;
+  box-shadow: 0 1px 3px rgba(138, 114, 74, 0.15);
+}
+
+.btn-back-text {
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}.back-button {
+   margin-bottom: 25px;
+ }
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #563F25;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: #FAF7F4;
+  border: 1px solid #DCC8B9;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 4px rgba(57, 43, 27, 0.08);
+}
+
+.btn-back:hover {
+  background-color: #EEE6E0;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(57, 43, 27, 0.15);
+}
+
+.btn-back:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(57, 43, 27, 0.15);
+}
+
+.btn-back-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: #FFF;
+  border-radius: 50%;
+  margin-right: 10px;
+  color: #8A724A;
+  box-shadow: 0 1px 3px rgba(138, 114, 74, 0.15);
+}
+
+.btn-back-text {
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}.back-button {
+   margin-bottom: 25px;
+ }
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #563F25;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: #FAF7F4;
+  border: 1px solid #DCC8B9;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 4px rgba(57, 43, 27, 0.08);
+}
+
+.btn-back:hover {
+  background-color: #EEE6E0;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(57, 43, 27, 0.15);
+}
+
+.btn-back:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(57, 43, 27, 0.15);
+}
+
+.btn-back-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background-color: #FFF;
+  border-radius: 50%;
+  margin-right: 10px;
+  color: #8A724A;
+  box-shadow: 0 1px 3px rgba(138, 114, 74, 0.15);
+}
+
+.btn-back-text {
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
 }
 
 @media (max-width: 768px) {
