@@ -75,7 +75,6 @@ const toggleSidebar = () => {
                 icon="pi pi-calendar"
                 class="p-button-text nav-item"
                 @click="navigateTo('supervisor-booking')"
-
             />
           </div>
 

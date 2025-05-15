@@ -97,6 +97,7 @@ export class BookingService {
         return http.get(url);
     }
 
+
     //booking-supervisor
     getAllBookings() {
         return http.get(`/bookings`); // Remove leading slash
@@ -124,4 +125,5 @@ export class BookingService {
     getHeadquarterById(headquarterId) {
         return http.get(`/headquarters/${headquarterId}`);
     }
+
 }

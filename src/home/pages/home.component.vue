@@ -42,7 +42,6 @@ export default {
         <h2 class="panel-title">Panel de administración</h2>
         <p>Bienvenido al panel de administración. Aquí puedes gestionar configuraciones avanzadas.</p>
       </div>
-
       <!-- Visible supervisores -->
       <div v-rbac="[RoleEnum.SUPERVISOR]" class="actions">
         <AssignedHeadquarterCard/>
