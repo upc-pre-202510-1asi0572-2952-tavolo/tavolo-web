@@ -1,6 +1,7 @@
 <script>
 import {HeadquarterEntity} from "@/branching/model/headquarter.entity.js";
 import {BranchingApiService} from "@/branching/services/branching-api.service.js";
+import {useAuthenticationStore} from "@/iam/services/authentication.store.js";
 
 export default {
   name: "AssignedHeadquarterCard",
@@ -21,10 +22,54 @@ export default {
         0
       ),
       loading: true,
-      error: null
+      error: null,
+      currentSupervisorId: null
     }
   },
   methods: {
+    async fetchHeadquarterBySupervisor() {
+      try {
+        this.loading = true;
+
+        // Import and use the authentication store
+        const authStore = useAuthenticationStore();
+        const supervisorId = authStore.currentUserId;
+
+        if (!supervisorId) {
+          throw new Error('No supervisor ID found');
+        }
+
+        this.currentSupervisorId = supervisorId;
+
+        // Get headquarter by supervisor ID
+        const response = await this.apiService.getHeadquarterBySupervisorId(this.currentSupervisorId);
+        const data = response.data;
+
+        if (!data) {
+          throw new Error('No headquarter assigned to this supervisor');
+        }
+
+        // Map response to entity
+        this.headquarter = new HeadquarterEntity(
+          data.id,
+          data.name,
+          data.landlinePhone,
+          data.mobilePhone,
+          data.latitude,
+          data.longitude,
+          data.streetAddress,
+          data.openingTime,
+          data.closingTime,
+          data.intervalMinutes
+        );
+      } catch (error) {
+        console.error('Error fetching headquarter:', error);
+        this.error = 'Failed to load headquarter data';
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async fetchHeadquarter(id) {
       try {
         this.loading = true;
@@ -43,17 +88,17 @@ export default {
           data.closingTime,
           data.intervalMinutes
         );
-
-        this.loading = false;
       } catch (error) {
         console.error('Error fetching headquarter:', error);
         this.error = 'Failed to load headquarter data';
+      } finally {
         this.loading = false;
       }
     }
   },
   mounted() {
-    this.fetchHeadquarter('1');
+    // Use the new fetchHeadquarterBySupervisor method instead of hardcoding ID
+    this.fetchHeadquarterBySupervisor();
   }
 }
 </script>
