@@ -97,4 +97,31 @@ export class BookingService {
         
         return http.get(url);
     }
+
+    //booking-supervisor
+    getAllBookings() {
+        return http.get(`/bookings`); // Remove leading slash
+    }
+
+    getTablesByHeadquarterId(headquarterId) {
+        return http.get(`/tables/headquarter/${headquarterId}`); // Remove leading slash
+    }
+
+    getTableSchedule(tableId) {
+        // Format date as YYYY-MM-DD
+        const today = new Date();
+        const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        return http.get(`/tables/${tableId}/schedule?date=${formattedDate}`);
+    }
+
+    getHeadquarterBySupervisorId(supervisorId) {
+        return http.get(`/headquarters/supervisors/${supervisorId}`); // Remove leading slash
+    }
+
+    getUserById(userId) {
+        return http.get(`/users/${userId}`); // Remove leading slash
+    }
+    getHeadquarterById(headquarterId) {
+        return http.get(`/headquarters/${headquarterId}`);
+    }
 }

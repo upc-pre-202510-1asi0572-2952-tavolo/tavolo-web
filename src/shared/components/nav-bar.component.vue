@@ -1,22 +1,22 @@
 <script setup>
-import { useRouter } from 'vue-router';
-import { useAuthenticationStore } from '@/iam/services/authentication.store';
-import { RoleEnum } from '@/iam/model/role.enum';
+import {useRouter} from 'vue-router';
+import {useAuthenticationStore} from '@/iam/services/authentication.store';
+import {RoleEnum} from '@/iam/model/role.enum';
 import AuthenticationSection from '@/iam/components/authentication-section.component.vue';
-import { ref } from 'vue'; 
+import {ref} from 'vue';
 
 const router = useRouter();
 const authStore = useAuthenticationStore();
-const sidebarVisible = ref(false); 
+const sidebarVisible = ref(false);
 
 const navigateTo = (routeName) => {
-  router.push({ name: routeName });
+  router.push({name: routeName});
   sidebarVisible.value = false;
 };
 
 const handleSignOut = () => {
   authStore.signOut(router);
-  sidebarVisible.value = false; 
+  sidebarVisible.value = false;
 };
 
 const toggleSidebar = () => {
@@ -29,7 +29,7 @@ const toggleSidebar = () => {
     <pv-toolbar class="custom-toolbar p-0">
       <template #start>
         <div class="brand" @click="navigateTo('home')">
-          <img src="@/assets/images/icon_tavolo.svg" alt="Tavolo" class="mr-2 brand-logo" />
+          <img src="@/assets/images/icon_tavolo.svg" alt="Tavolo" class="mr-2 brand-logo"/>
           <span class="brand-name">Tavolo</span>
         </div>
       </template>
@@ -37,76 +37,76 @@ const toggleSidebar = () => {
       <template #end>
         <div class="desktop-menu">
           <div v-rbac="[RoleEnum.USER]" class="nav-menu">
-            <pv-button 
-              label="Inicio" 
-              icon="pi pi-home" 
-              class="p-button-text nav-item" 
-              @click="navigateTo('home')"
+            <pv-button
+                label="Inicio"
+                icon="pi pi-home"
+                class="p-button-text nav-item"
+                @click="navigateTo('home')"
             />
-            <pv-button 
-              label="Menú" 
-              icon="pi pi-book" 
-              class="p-button-text nav-item" 
-              @click="navigateTo('menu')"
+            <pv-button
+                label="Menú"
+                icon="pi pi-book"
+                class="p-button-text nav-item"
+                @click="navigateTo('menu')"
             />
-            <pv-button 
-              label="Reservar" 
-              icon="pi pi-calendar-plus" 
-              class="p-button-text nav-item" 
-              @click="navigateTo('reservation')"
+            <pv-button
+                label="Reservar"
+                icon="pi pi-calendar-plus"
+                class="p-button-text nav-item"
+                @click="navigateTo('reservation')"
             />
           </div>
 
           <div v-rbac="[RoleEnum.SUPERVISOR]" class="nav-menu">
-            <pv-button 
-              label="Inicio" 
-              icon="pi pi-home" 
-              class="p-button-text nav-item" 
-              @click="navigateTo('home')"
+            <pv-button
+                label="Inicio"
+                icon="pi pi-home"
+                class="p-button-text nav-item"
+                @click="navigateTo('home')"
             />
-            <pv-button 
-              label="Gestión de Mesas" 
-              icon="pi pi-table" 
-              class="p-button-text nav-item" 
-              @click="navigateTo('table-management')"
+            <pv-button
+                label="Gestión de Mesas"
+                icon="pi pi-table"
+                class="p-button-text nav-item"
+                @click="navigateTo('table-management')"
             />
-            <pv-button 
-              label="Ver Reservas" 
-              icon="pi pi-calendar" 
-              class="p-button-text nav-item" 
-              @click="navigateTo('reservations')"
+            <pv-button
+                label="Ver Reservas"
+                icon="pi pi-calendar"
+                class="p-button-text nav-item"
+                @click="navigateTo('supervisor-booking')"
             />
           </div>
 
           <div v-rbac="[RoleEnum.ADMIN]" class="nav-menu">
-            <pv-button 
-              label="Inicio" 
-              icon="pi pi-home" 
-              class="p-button-text nav-item" 
-              @click="navigateTo('home')"
+            <pv-button
+                label="Inicio"
+                icon="pi pi-home"
+                class="p-button-text nav-item"
+                @click="navigateTo('home')"
             />
-            <pv-button 
-              label="Gestión de Mesas" 
-              icon="pi pi-table" 
-              class="p-button-text nav-item" 
-              @click="navigateTo('table-management')"
+            <pv-button
+                label="Gestión de Mesas"
+                icon="pi pi-table"
+                class="p-button-text nav-item"
+                @click="navigateTo('table-management')"
             />
-            <pv-button 
-              label="Ver Reservas" 
-              icon="pi pi-calendar" 
-              class="p-button-text nav-item" 
-              @click="navigateTo('reservations')"
+            <pv-button
+                label="Ver Reservas"
+                icon="pi pi-calendar"
+                class="p-button-text nav-item"
+                @click="navigateTo('reservations')"
             />
           </div>
         </div>
-        
-        <authentication-section class="auth-desktop" />
-        
-        <pv-button 
-          icon="pi pi-bars" 
-          class="p-button-text mobile-menu-btn" 
-          @click="toggleSidebar"
-          aria-label="Menú"
+
+        <authentication-section class="auth-desktop"/>
+
+        <pv-button
+            icon="pi pi-bars"
+            class="p-button-text mobile-menu-btn"
+            @click="toggleSidebar"
+            aria-label="Menú"
         />
       </template>
     </pv-toolbar>
@@ -115,12 +115,12 @@ const toggleSidebar = () => {
       <div class="sidebar-header">
         <h3>Menú</h3>
       </div>
-      
+
       <div class="sidebar-user-info">
         <i class="pi pi-user mr-2"></i>
         <span>{{ authStore.currentUsername }}</span>
       </div>
-      
+
       <div class="sidebar-content">
         <div v-rbac="[RoleEnum.USER]" class="mobile-menu-group">
           <h4 class="menu-group-title">Navegación</h4>
@@ -136,7 +136,7 @@ const toggleSidebar = () => {
             </li>
           </ul>
         </div>
-      
+
         <div v-rbac="[RoleEnum.SUPERVISOR]" class="mobile-menu-group">
           <h4 class="menu-group-title">Navegación</h4>
           <ul class="mobile-menu-list">
@@ -146,12 +146,12 @@ const toggleSidebar = () => {
             <li @click="navigateTo('table-management')">
               <i class="pi pi-table mr-2"></i>Gestión de Mesas
             </li>
-            <li @click="navigateTo('reservations')">
+            <li @click="navigateTo('supervisor-booking')">
               <i class="pi pi-calendar mr-2"></i>Ver Reservas
             </li>
           </ul>
         </div>
-      
+
         <div v-rbac="[RoleEnum.ADMIN]" class="mobile-menu-group">
           <h4 class="menu-group-title">Navegación</h4>
           <ul class="mobile-menu-list">
@@ -167,13 +167,13 @@ const toggleSidebar = () => {
           </ul>
         </div>
       </div>
-      
+
       <div class="sidebar-footer">
-        <pv-button 
-          label="Cerrar sesión" 
-          icon="pi pi-sign-out" 
-          @click="handleSignOut" 
-          class="p-button-danger p-button-outlined w-full"
+        <pv-button
+            label="Cerrar sesión"
+            icon="pi pi-sign-out"
+            @click="handleSignOut"
+            class="p-button-danger p-button-outlined w-full"
         />
       </div>
     </pv-sidebar>
@@ -192,10 +192,11 @@ const toggleSidebar = () => {
 
 /* Toolbar transparente */
 :deep(.custom-toolbar) {
-  background: transparent !important;
+  background-color: #FFFFFF !important;
   color: var(--text-color) !important;
   border: none !important;
   padding: 0.5rem !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Estilos de botones en toolbar */
@@ -363,7 +364,7 @@ const toggleSidebar = () => {
   .desktop-menu, .auth-desktop {
     display: none;
   }
-  
+
   .mobile-menu-btn {
     display: block;
   }
