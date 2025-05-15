@@ -3,7 +3,6 @@ import { RoleEnum } from "@/iam/model/role.enum.js";
 import BookingCarousel from '@/booking/components/booking-carousel.component.vue';
 import {onMounted, ref} from 'vue';
 import AssignedHeadquarterCard from "@/branching/components/assigned-headquarter-card.vue";
-import HeadquarterBookings from "../../../../../web-app-supervisor/src/supervisor/booking-supervisor/components/headquarter-booking-list.vue";
 import HeadquarterTableList from "@/booking/components/headquarter-table-list.vue";
 
 export default {
@@ -12,7 +11,6 @@ export default {
     HeadquarterTableList,
     BookingCarousel,
     AssignedHeadquarterCard,
-    HeadquarterBookings
   },
   setup() {
     // Define refs

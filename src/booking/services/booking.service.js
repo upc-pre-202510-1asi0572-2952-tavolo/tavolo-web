@@ -113,8 +113,8 @@ export class BookingService {
         return http.get(`/tables/${tableId}/schedule?date=${formattedDate}`);
     }
 
-    getHeadquarterBySupervisorId(supervisorId) {
-        return http.get(`/headquarters/supervisors/${supervisorId}`); // Remove leading slash
+    async getHeadquarterBySupervisorId(supervisorId) {
+        return http.get(`/headquarters/supervisors/${supervisorId}`);
     }
 
     getUserById(userId) {

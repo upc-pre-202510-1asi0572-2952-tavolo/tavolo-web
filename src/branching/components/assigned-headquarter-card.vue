@@ -23,48 +23,62 @@ export default {
       ),
       loading: true,
       error: null,
-      currentSupervisorId: null
+      currentSupervisorId: null,
+      retryCount: 0,
+      maxRetries: 3
     }
   },
   methods: {
     async fetchHeadquarterBySupervisor() {
       try {
         this.loading = true;
+        this.error = null;
 
         // Import and use the authentication store
         const authStore = useAuthenticationStore();
         const supervisorId = authStore.currentUserId;
 
         if (!supervisorId) {
-          throw new Error('No supervisor ID found');
+          this.error = 'User authentication required';
+          return;
         }
 
         this.currentSupervisorId = supervisorId;
 
-        // Get headquarter by supervisor ID
-        const response = await this.apiService.getHeadquarterBySupervisorId(this.currentSupervisorId);
-        const data = response.data;
+        // Get supervisor data with headquarterId
+        const supervisorResponse = await this.apiService.getHeadquarterBySupervisorId(this.currentSupervisorId);
 
-        if (!data) {
-          throw new Error('No headquarter assigned to this supervisor');
+        if (!supervisorResponse || !supervisorResponse.data) {
+          this.error = 'No supervisor data available';
+          return;
         }
 
-        // Map response to entity
-        this.headquarter = new HeadquarterEntity(
-          data.id,
-          data.name,
-          data.landlinePhone,
-          data.mobilePhone,
-          data.latitude,
-          data.longitude,
-          data.streetAddress,
-          data.openingTime,
-          data.closingTime,
-          data.intervalMinutes
-        );
+        const supervisorData = supervisorResponse.data;
+
+        if (!supervisorData.headquarterId) {
+          this.error = 'No headquarter assigned to this supervisor';
+          return;
+        }
+
+        // Now fetch the correct headquarter using the headquarterId from the response
+        await this.fetchHeadquarter(supervisorData.headquarterId);
+
       } catch (error) {
         console.error('Error fetching headquarter:', error);
-        this.error = 'Failed to load headquarter data';
+
+        if (error.response) {
+          if (error.response.status === 404) {
+            this.error = 'Supervisor or headquarter not found';
+          } else if (error.response.status === 500) {
+            this.error = 'Server error. Please try again later.';
+          } else {
+            this.error = `Error: ${error.response.status}`;
+          }
+        } else if (error.request) {
+          this.error = 'Network error. Please check your connection.';
+        } else {
+          this.error = error.message || 'Failed to load data';
+        }
       } finally {
         this.loading = false;
       }
@@ -73,7 +87,20 @@ export default {
     async fetchHeadquarter(id) {
       try {
         this.loading = true;
+        this.error = null;
+
+        if (!id) {
+          this.error = 'Invalid headquarter ID';
+          return;
+        }
+
         const response = await this.apiService.getHeadquarterById(id);
+
+        if (!response || !response.data) {
+          this.error = 'No headquarter data available';
+          return;
+        }
+
         const data = response.data;
 
         this.headquarter = new HeadquarterEntity(
@@ -90,18 +117,24 @@ export default {
         );
       } catch (error) {
         console.error('Error fetching headquarter:', error);
-        this.error = 'Failed to load headquarter data';
+
+        if (error.response?.status === 404) {
+          this.error = `Headquarter with ID ${id} not found`;
+        } else {
+          this.error = 'Failed to load headquarter data';
+        }
       } finally {
         this.loading = false;
       }
     }
   },
   mounted() {
-    // Use the new fetchHeadquarterBySupervisor method instead of hardcoding ID
     this.fetchHeadquarterBySupervisor();
   }
 }
 </script>
+
+
 <template>
   <div class="headquarter-card" v-if="!loading && !error">
     <div class="card-header">
