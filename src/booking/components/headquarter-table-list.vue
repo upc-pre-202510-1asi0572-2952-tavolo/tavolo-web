@@ -105,6 +105,8 @@ export default {
 
 <template>
   <div class="headquarter-tables">
+    <h2 class="section-title">Ver reservas</h2>
+
     <!-- Loading and error states -->
     <div v-if="loading" class="status-message loading">
       <p>Cargando mesas...</p>
@@ -130,13 +132,21 @@ export default {
 
 <style scoped>
 .headquarter-tables {
+  padding: 20px 0;
   width: 100%;
+}
+
+.section-title {
+  margin-bottom: 20px;
+  color: var(--primaryColor900);
+  text-align: left;
 }
 
 .tables-grid {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-top: 20px;
   width: 100%;
 }
 
