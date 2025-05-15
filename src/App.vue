@@ -31,6 +31,7 @@ const isAuthenticated = computed(() => {
   width: 100%;
   overflow-x: hidden;
   align-items: center; /* Center children horizontally */
+
 }
 
 .main-content {
