@@ -208,7 +208,7 @@ onMounted(() => {
         </div>
 
         <button class="btn-success" @click="closeModal">
-          <i class="pi pi-check"></i> Aceptar
+          Aceptar
         </button>
       </div>
 
@@ -649,15 +649,11 @@ onMounted(() => {
 .detail-item {
   display: flex;
   align-items: center;
-  margin-bottom: 14px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #EEE6E0;
+  padding-left: 20px;
   width: 100%;
 }
 
 .detail-icon {
-  width: 40px;
-  height: 40px;
   background-color: #FAF7F4;
   border-radius: 50%;
   display: flex;
@@ -672,6 +668,7 @@ onMounted(() => {
 .detail-text {
   text-align: left;
   flex-grow: 1;
+  padding-left: 10px;
 }
 
 .detail-label {
@@ -690,20 +687,17 @@ onMounted(() => {
 }
 
 .btn-success {
-  margin-top: 20px;
-  padding: 12px 30px;
   background-color: #43A047;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 8px;
   font-size: 0.95rem;
   box-shadow: 0 2px 6px rgba(67, 160, 71, 0.3);
   transition: all 0.2s;
+  padding: 10px;
 }
 
 .btn-success:hover {

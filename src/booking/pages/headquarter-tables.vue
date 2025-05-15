@@ -132,16 +132,6 @@ const refreshTables = async () => {
             </select>
           </div>
 
-          <div class="filter-group">
-            <label for="zoneFilter">Zona:</label>
-            <select id="zoneFilter" v-model="zoneFilter">
-              <option value="all">Todas las zonas</option>
-              <option v-for="zone in availableZones" :key="zone" :value="zone">
-                {{ zone.charAt(0).toUpperCase() + zone.slice(1) }}
-              </option>
-            </select>
-          </div>
-
           <button class="btn-reset" @click="resetFilters">
             <i class="pi pi-filter-slash"></i> Limpiar filtros
           </button>
