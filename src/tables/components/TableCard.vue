@@ -1,10 +1,10 @@
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue';
-import { Table } from '../model/table.entitie';
+import { TableEntity } from '../model/table.entity.js';
 
 const props = defineProps({
   table: {
-    type: Table,
+    type: Object, // Changed from Table to Object since TableEntity is a class
     required: true
   }
 });
