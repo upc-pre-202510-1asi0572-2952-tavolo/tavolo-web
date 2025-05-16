@@ -35,8 +35,6 @@ const isAuthenticated = computed(() => {
   padding-top: 7em;
   flex: 1;
   width: 90%;
-  max-width: 1200px; /* Optional: adds a maximum width */
-  margin: 0 auto; /* Centers the element horizontally */
 }
 .main-content.no-header {
   padding-top: 0;

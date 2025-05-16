@@ -33,7 +33,6 @@ const getSchedule = () => {
 <template>
   <div class="headquarter-card">
     <div class="card-image">
-      <!-- Placeholder image similar to the design -->
     </div>
     <div class="card-content">
       <h3 class="card-title">{{ headquarter.name }}</h3>
@@ -72,8 +71,8 @@ const getSchedule = () => {
 }
 
 .card-image {
-  width: 170px;
-  height: 170px;
+  width: 30%;
+  height: auto;
   background-color: #DCC8B9;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='30' cy='30' r='10' fill='%23C0B2A6'/%3E%3Cpath d='M20 70 L50 40 L80 70' stroke='%23C0B2A6' stroke-width='2' fill='none'/%3E%3C/svg%3E");
   background-size: cover;

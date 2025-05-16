@@ -113,8 +113,8 @@ const handleCancel = () => {
       </div>
 
       <div class="button-container">
-        <button type="button" class="secondary" @click="handleCancel">Cancelar</button>
-        <button type="submit">Agregar</button>
+        <pv-button type="button" class="secondary" @click="handleCancel">Cancelar</pv-button>
+        <pv-button type="submit" class="add">Agregar</pv-button>
       </div>
     </form>
   </div>
@@ -198,29 +198,37 @@ input:focus, .custom-select:focus {
   margin-top: 28px;
 }
 
-button {
-  padding: 12px 24px;
-  background-color: #a67c52;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
+button.add {
+  margin-left: auto;
+  background-color: var(--primaryColor500);
+  border-color: var(--primaryColor500);
+  color: var(--primaryColor50);
+  border-radius: 1.5em;
+  transition: transform 0.2s ease-in-out, background-color 0.2s, border-color 0.2s;
 }
 
-button:hover {
-  background-color: #8a653e;
-}
+button.add:hover {
+  background-color: var(--primaryColor400);
+  border-color: var(--primaryColor400);
+  color: var(--primaryColor50);
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;}
 
 button.secondary {
-  background-color: #f5f5f5;
-  color: #333;
-  margin-right: 10px;
+  margin-left: auto;
+  background-color: #6C6860FF;
+  border-color: #6C6860FF;
+  color: var(--primaryColor50);
+  border-radius: 1.5em;
+  transition: transform 0.2s ease-in-out, background-color 0.2s, border-color 0.2s;
+
 }
 
 button.secondary:hover {
-  background-color: #e5e5e5;
+  background-color: #a4a2a1;
+  border-color: #A4A2A1FF;
+  color: var(--primaryColor50);
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
 }
 </style> 

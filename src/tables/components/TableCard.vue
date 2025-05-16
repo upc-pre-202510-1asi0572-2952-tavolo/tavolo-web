@@ -54,10 +54,6 @@ const handleDelete = () => {
   color: #333333;
 }
 
-.table-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
 
 .table-header h3 {
   font-size: 18px;
@@ -80,6 +76,15 @@ const handleDelete = () => {
 
 .delete-btn {
   background-color: #9C2B1B;
-  color: white;
+  color: var(--primaryColor50);
+  border-radius: 1.5em;
+  transition: transform 0.2s ease-in-out, background-color 0.2s, border-color 0.2s;
+}
+
+.delete-btn {
+  background-color: #9C2B1B;
+  color: var(--primaryColor50);
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
 }
 </style> 

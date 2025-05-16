@@ -52,7 +52,7 @@ export function createAppRouter() {
                 path: '/access-denied', 
                 name: 'access-denied',
                 component: () => import('../public/pages/access-denied.component.vue'),
-                meta: { title: 'Acceso Denegado' }
+                meta: { title: 'Acceso Denegado'}
             },
             { 
                 path: '/tables', 

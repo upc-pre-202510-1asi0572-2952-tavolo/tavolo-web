@@ -5,15 +5,22 @@ import {RoleEnum} from '@/iam/model/role.enum';
 import AuthenticationSection from '@/iam/components/authentication-section.component.vue';
 import {ref} from 'vue';
 
-const router = useRouter();
 const authStore = useAuthenticationStore();
 const sidebarVisible = ref(false);
 
-const navigateTo = (routeName) => {
-  router.push({name: routeName});
-  sidebarVisible.value = false;
-};
+const router = useRouter();
 
+// Replace the problematic navigateTo function
+const navigateTo = (routeName) => {
+  // Check if the route exists before navigating
+  try {
+    router.push({ name: routeName });
+  } catch (error) {
+    console.error(`Navigation error: ${error}`);
+    // Fallback to a known route, like 'home' or 'dashboard'
+    router.push({ name: 'home' }); // Replace 'home' with a route you know exists
+  }
+}
 const handleSignOut = () => {
   authStore.signOut(router);
   sidebarVisible.value = false;

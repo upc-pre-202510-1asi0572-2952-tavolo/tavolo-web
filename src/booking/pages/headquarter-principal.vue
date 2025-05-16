@@ -1,4 +1,3 @@
-<!-- src/booking/pages/headquarter-principal.vue -->
 <script setup>
 import { ref, onMounted } from 'vue';
 import { HeadquartersService } from '../services/headquarter.service';
@@ -48,32 +47,12 @@ onMounted(async () => {
         />
       </div>
     </div>
-
-    <div class="page-divider">
-      <span class="divider-circle"></span>
-    </div>
   </div>
 </template>
 
 <style scoped>
-.headquarters-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #FFFFFF;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
 .page-header {
   text-align: center;
-  margin: 40px 0;
-}
-
-h1 {
-  font-size: 2rem;
-  color: #392B1B;
-  font-weight: 600;
-  margin: 0;
 }
 
 .loading, .error-message, .no-results {
@@ -95,33 +74,6 @@ h1 {
   flex-direction: column;
   gap: 20px;
   padding: 10px 0 30px;
-}
-
-.page-divider {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 40px 0;
-  position: relative;
-}
-
-.page-divider:before {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 1px;
-  background-color: #DCC8B9;
-  z-index: 0;
-}
-
-.divider-circle {
-  width: 12px;
-  height: 12px;
-  background-color: #8A724A;
-  border-radius: 50%;
-  display: block;
-  position: relative;
-  z-index: 1;
 }
 
 @media (max-width: 768px) {

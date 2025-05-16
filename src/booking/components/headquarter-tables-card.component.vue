@@ -1,7 +1,6 @@
 <!-- src/booking/components/headquarter-tables-card.component.vue -->
 <script setup>
 import { ref, computed } from 'vue';
-import { TablesEntity } from '../model/tables.entitie';
 
 const props = defineProps({
   table: {
@@ -17,7 +16,6 @@ const props = defineProps({
 
 const emit = defineEmits(['select-table', 'reserve-table']);
 
-// Uso de propiedades de TablesEntity
 const isAvailable = computed(() => props.table.status?.toLowerCase() === 'available');
 const tableClass = computed(() => `table-card ${isAvailable.value ? 'available' : 'occupied'}`);
 

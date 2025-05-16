@@ -131,7 +131,7 @@ onMounted(async () => {
     <pv-confirm-dialog></pv-confirm-dialog>
     
     <div class="booking-carousel-container">
-        <h2 class="carousel-title">Mis Reservas</h2>
+        <h1 class="carousel-title">Mis Reservas</h1>
         
         <!-- Muestra mensaje si no hay reservas -->
         <div v-if="bookings.length === 0" class="no-bookings-message">
@@ -281,12 +281,10 @@ onMounted(async () => {
 
 /* Estilos del título */
 .carousel-title {
-    font-size: 1.5rem;
-    color: var(--text-primary);
-    margin-bottom: 1.5rem;
-    text-align: left;
-    padding-left: 1rem;
-    font-weight: 600;
+  color: var(--primaryColor900);
+  text-align: left;
+  padding: 0 0 20px 0;
+  margin: 0;
 }
 
 /* Estilos para las tarjetas de reserva */

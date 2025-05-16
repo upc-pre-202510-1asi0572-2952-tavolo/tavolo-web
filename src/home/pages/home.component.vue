@@ -4,6 +4,7 @@ import BookingCarousel from '@/booking/components/booking-carousel.component.vue
 import {onMounted, ref} from 'vue';
 import AssignedHeadquarterCard from "@/branching/components/assigned-headquarter-card.vue";
 import HeadquarterTableList from "@/booking/components/headquarter-table-list.vue";
+import {useRouter} from "vue-router";
 
 export default {
   name: "HomeComponent",
@@ -13,9 +14,18 @@ export default {
     AssignedHeadquarterCard,
   },
   setup() {
-    // Define refs
     const currentSupervisorId = ref(null);
     const defaultViewType = 'table';
+    const router = useRouter();
+
+    const navigateTo = (routeName) => {
+      try {
+        router.push({ name: routeName });
+      } catch (error) {
+        console.error(`Navigation error: ${error}`);
+        router.push({ name: 'home' });
+      }
+    }
 
     onMounted(() => {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -27,7 +37,8 @@ export default {
     return {
       RoleEnum,
       currentSupervisorId,
-      defaultViewType
+      defaultViewType,
+      navigateTo
     };
   }
 }
@@ -42,9 +53,14 @@ export default {
         <h2 class="panel-title">Panel de administración</h2>
         <p>Bienvenido al panel de administración. Aquí puedes gestionar configuraciones avanzadas.</p>
       </div>
+
       <!-- Visible supervisores -->
       <div v-rbac="[RoleEnum.SUPERVISOR]" class="actions">
         <AssignedHeadquarterCard/>
+        <div class="title">
+          <h2 class="subtitle">Ver reservas</h2>
+          <pv-button class="btn-ver-mas" @click="navigateTo('supervisor-booking')">Ver más</pv-button>
+        </div>
         <HeadquarterTableList/>
       </div>
 
@@ -62,7 +78,6 @@ export default {
   justify-content: center;
   align-items: flex-start;
   min-height: calc(100vh - 64px);
-  padding-top: 64px; /* Espacio para el navbar */
   background-color: var(--background-color);
 }
 
@@ -85,7 +100,7 @@ export default {
   margin-bottom: 24px;
   border-radius: 8px;
   text-align: left;
-  flex-grow: 0; /* No crecer más de lo necesario */
+  flex-grow: 0;
 }
 
 .actions {
@@ -97,11 +112,33 @@ export default {
   flex-grow: 1;
   width: 100%;
 }
-.general-content {
-  text-align: left;
-  margin-top: 20px;
-  flex-grow: 1; /* Crecer para ocupar espacio disponible */
+
+.title {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.subtitle {
+  margin: 0;
+  text-align: left;
+}
+
+.btn-ver-mas:hover {
+  background-color: var(--primaryColor400);
+  border-color: var(--primaryColor400);
+  color: var(--primaryColor50);
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
+}
+
+.btn-ver-mas {
+  margin-left: auto;
+  background-color: var(--primaryColor500);
+  border-color: var(--primaryColor500);
+  color: var(--primaryColor50);
+  border-radius: 1.5em;
+  transition: transform 0.2s ease-in-out, background-color 0.2s, border-color 0.2s;
 }
 </style>

@@ -11,7 +11,6 @@ const tables = ref([]);
 const loading = ref(true);
 const showModal = ref(false);
 
-// Cargar todas las mesas al iniciar
 onMounted(async () => {
   try {
     await loadTables();
@@ -129,7 +128,6 @@ const showSuccessMessage = (message) => {
 <template>
   <div class="tables-management">
     <pv-toast />
-    <!-- Título centrado -->
     <div class="header">
       <h1 class="title">Gestionar mesas</h1>
     </div>
@@ -158,12 +156,6 @@ const showSuccessMessage = (message) => {
 </template>
 
 <style scoped>
-.tables-management {
-  max-width: 1200px;
-  margin: 80px auto 0;
-  padding: 20px;
-  color: #333333;
-}
 
 .header {
   text-align: center;
@@ -172,11 +164,10 @@ const showSuccessMessage = (message) => {
 }
 
 .title {
-  font-size: 24px;
-  font-weight: 500;
-  color: #333333;
+  color: var(--primaryColor900);
+  text-align: center;
+  padding: 0 0 20px 0;
   margin: 0;
-  display: inline-block;
 }
 
 .actions-container {
@@ -186,10 +177,20 @@ const showSuccessMessage = (message) => {
 }
 
 .add-table-btn {
-  background-color: #a67c52;
-  color: white;
-  border: none;
-  border-radius: 6px;
+  margin-left: auto;
+  background-color: var(--primaryColor500);
+  border-color: var(--primaryColor500);
+  color: var(--primaryColor50);
+  border-radius: 1.5em;
+  transition: transform 0.2s ease-in-out, background-color 0.2s, border-color 0.2s;
+
+}
+.add-table-btn:hover {
+  background-color: var(--primaryColor400);
+  border-color: var(--primaryColor400);
+  color: var(--primaryColor50);
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
 }
 
 .loading-state {
@@ -206,12 +207,12 @@ const showSuccessMessage = (message) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(2px);
 }
 
 .custom-modal-container {

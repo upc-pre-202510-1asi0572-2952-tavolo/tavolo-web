@@ -58,22 +58,54 @@ export default {
   gap: 10px;
 }
 
+/* Enhance the select element */
 .dropdown-control {
-  padding: 8px 12px;
-  border: 1px solid #DCC8B9;
-  border-radius: 4px;
-  background-color: #F9F5F1;
-  color: #392B1B;
-  font-size: 0.9rem;
+  padding: 10px 14px;
+  border: 1px solid var(--primaryColor200);
+  border-radius: 6px;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  font-size: 1rem;
   cursor: pointer;
   min-width: 180px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 10px center;
 }
 
+.dropdown-control:hover {
+  border-color: var(--primaryColor400);
+  box-shadow: 0 2px 5px rgba(194, 154, 108, 0.2);
+}
+
+.dropdown-control:focus {
+  outline: none;
+  border-color: var(--primaryColor500);
+  box-shadow: 0 0 0 2px rgba(172, 131, 98, 0.25);
+}
+
+.dropdown-control option {
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  padding: 12px;
+  font-size: 1rem;
+}
+
+.view-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 15px;
+  border-radius: 8px;
+}
+
+.view-selector label {
+  font-weight: 600;
+  color: var(--primaryColor800);
+}
 .content-container {
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  margin-top: 2em;
   padding: 20px;
 }
 </style>
