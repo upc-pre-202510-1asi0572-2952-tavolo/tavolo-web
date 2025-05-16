@@ -1,6 +1,6 @@
 <script setup>
 import { ref, defineEmits } from 'vue';
-import { Table } from '../model/table.entitie';
+import { TableEntity } from '../model/table.entity.js';
 
 const emit = defineEmits(['save', 'cancel']);
 
@@ -8,7 +8,7 @@ const emit = defineEmits(['save', 'cancel']);
 const tableNumber = ref('');
 const seats = ref('');
 const zone = ref('Sala principal');
-const headquarterId = ref(1); // Valor por defecto para la sede
+const headquarterId = ref(props.predefinedHeadquarterId);
 
 // Zonas disponibles
 const zones = [
@@ -16,6 +16,13 @@ const zones = [
   { name: 'Terraza', value: 'Terraza' },
   { name: 'Ventana', value: 'Ventana' }
 ];
+const props = defineProps({
+  predefinedHeadquarterId: {
+    type: Number,
+    default: null
+  }
+});
+
 
 // Validación de formulario
 const errors = ref({});
@@ -45,20 +52,19 @@ const validateForm = () => {
 
 const handleSubmit = () => {
   if (validateForm()) {
-    const newTable = new Table(
-      null,
-      Number(headquarterId.value),
-      Number(tableNumber.value),
-      Number(seats.value),
-      'AVAILABLE',
-      zone.value
+    const newTable = new TableEntity(
+        null,
+        Number(headquarterId.value),
+        Number(tableNumber.value),
+        Number(seats.value),
+        'AVAILABLE',
+        zone.value
     );
-    
+
     emit('save', newTable);
     resetForm();
   }
 };
-
 const resetForm = () => {
   tableNumber.value = '';
   seats.value = '';
