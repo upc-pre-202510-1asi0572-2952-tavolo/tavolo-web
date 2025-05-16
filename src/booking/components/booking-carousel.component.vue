@@ -6,7 +6,6 @@ import { Booking } from '@/booking/model/booking.entitie';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
 
-// Store y servicio
 const authStore = useAuthenticationStore();
 const bookingService = new BookingService();
 const confirm = useConfirm();
@@ -88,23 +87,30 @@ const deleteBooking = (id) => {
     });
 };
 
-// Cargar reservas del cliente autenticado
 onMounted(async () => {
     try {
         loading.value = true;
         const clientId = authStore.currentUserId;
-        
+
         // Verificar si hay ID de cliente
         if (!clientId) {
             error.value = "No se pudo identificar al usuario";
             loading.value = false;
             return;
         }
-        
-        const response = await bookingService.getBookingsByClientId(clientId);
-        
+
+        // Log the URL we're trying to access for debugging
+        console.log(`Fetching bookings for client: ${clientId}`);
+
+        // Try using a more robust approach with explicit error handling
+        const response = await bookingService.getBookingsByClientId(clientId)
+            .catch(err => {
+                console.error('API endpoint error:', err.response?.status, err.response?.data);
+                throw new Error(`Error al acceder a las reservas: ${err.response?.status || 'Error de conexión'}`);
+            });
+
         // Verificar si hay datos
-        if (response.data && Array.isArray(response.data)) {
+        if (response && response.data && Array.isArray(response.data)) {
             bookings.value = response.data.map(item => new Booking({
                 id: item.id,
                 clientId: item.clientId,
@@ -120,6 +126,7 @@ onMounted(async () => {
     } catch (err) {
         console.error('Error al cargar las reservas:', err);
         error.value = err.message || 'Error al cargar reservas';
+        bookings.value = []; // Ensure bookings is empty on error
     } finally {
         loading.value = false;
     }
