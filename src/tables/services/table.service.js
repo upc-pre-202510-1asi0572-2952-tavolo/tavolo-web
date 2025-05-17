@@ -15,13 +15,13 @@ export default {
     return response.data;
   },
   async deleteTable(id) {
-    console.log(`Intentando eliminar mesa con ID: ${id}`);
+    console.log(`Attempting to delete table with ID: ${id}`);
     try {
-      const response = await http.post(`${resource}/delete/${id}`);
-      console.log(`Mesa ${id} eliminada correctamente con respuesta:`, response.data);
+      const response = await http.delete(`${resource}/${id}`);
+      console.log(`Table ${id} deleted successfully with response:`, response.data);
       return response.data;
     } catch (error) {
-      console.error('Error al eliminar mesa:', error.response?.data || error.message);
+      console.error('Error deleting table:', error.response?.data || error.message);
       throw error;
     }
   },
