@@ -13,4 +13,7 @@ export class Booking {
             slot instanceof BookingSlot ? slot : new BookingSlot(slot)
         );
     }
+    static fromJson(json) {
+        return new Booking(json);
+    }
 }
