@@ -18,6 +18,16 @@ export function createAppRouter() {
                     requiresAuth: true
                 }
             },
+            // Rutas de gestión de menús
+            {
+                path: '/menu',
+                name: 'menu',
+                component: () => import('../menu/pages/menu-list.vue'),
+                meta: {
+                    title: 'Menu',
+                    requiresAuth: true,
+                }
+            },
             {
                 path: '/headquarters',
                 name: 'reservation',
