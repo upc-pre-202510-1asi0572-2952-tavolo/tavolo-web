@@ -2,6 +2,7 @@
 import {ref, computed, onMounted, watch} from 'vue';
 import {BookingService} from '../services/booking.service.js';
 import {TablesService} from "../services/tables.service.js";
+import {useAuthenticationStore} from "../../iam/services/authentication.store.js"; // Importar el store
 
 const props = defineProps({
   tableInfo: {
@@ -19,7 +20,7 @@ const emit = defineEmits(['close', 'success']);
 const bookingService = new BookingService();
 const tablesService = new TablesService();
 const timeSlots = ref([]);
-const selectedSlotId = ref(null);
+const selectedSlotIds = ref([]);
 const customerName = ref('');
 const customerPhone = ref('');
 const customerEmail = ref('');
@@ -27,6 +28,7 @@ const loading = ref(false);
 const loadingSlots = ref(false);
 const error = ref(null);
 const success = ref(false);
+const authStore = useAuthenticationStore();
 
 const formattedDate = ref(new Date().toISOString().split('T')[0]);
 
@@ -39,24 +41,33 @@ const loadTimeSlots = async () => {
 
   loadingSlots.value = true;
   error.value = null;
-  selectedSlotId.value = null;
+  // No limpiamos selectedSlotIds para mantener selecciones si es el mismo día
 
   try {
     const response = await tablesService.getTableSchedule(props.tableInfo.tableId, formattedDate.value);
 
     if (response && response.data) {
-      timeSlots.value = response.data.map(slot => ({
+      const newSlots = response.data.map(slot => ({
         id: slot.id,
         label: `${slot.startTime}`,
         available: slot.status.toLowerCase() === 'available'
       }));
+
+      timeSlots.value = newSlots;
+
+      // Filtramos selectedSlotIds para mantener solo los que siguen disponibles
+      selectedSlotIds.value = selectedSlotIds.value.filter(id =>
+          newSlots.some(slot => slot.id === id && slot.available)
+      );
     } else {
       timeSlots.value = [];
+      selectedSlotIds.value = [];
     }
   } catch (err) {
     console.error("Error al cargar los horarios:", err);
     error.value = "No se pudieron cargar los horarios disponibles. Por favor, inténtelo de nuevo.";
     timeSlots.value = [];
+    selectedSlotIds.value = [];
   } finally {
     loadingSlots.value = false;
   }
@@ -81,13 +92,22 @@ const handleDateChange = () => {
   loadTimeSlots();
 };
 
+const toggleTimeSlot = (slotId) => {
+  const index = selectedSlotIds.value.indexOf(slotId);
+  if (index === -1) {
+    selectedSlotIds.value.push(slotId);
+  } else {
+    selectedSlotIds.value.splice(index, 1);
+  }
+};
+
 const selectTimeSlot = (slotId) => {
   selectedSlotId.value = slotId;
 };
 
 const validateForm = () => {
-  if (!selectedSlotId.value) {
-    error.value = "Por favor seleccione un horario para su reserva.";
+  if (selectedSlotIds.value.length === 0) {
+    error.value = "Por favor seleccione al menos un horario para su reserva.";
     return false;
   }
 
@@ -102,10 +122,10 @@ const submitReservation = async () => {
 
   try {
     const reservationData = {
-      clientId: 1, // Usar ID del cliente real
+      clientId: authStore.currentUserId, // Usar el ID del usuario autenticado
       tableId: props.tableInfo.tableId,
       bookingDate: formattedDate.value,
-      slotIds: [selectedSlotId.value]
+      slotIds: selectedSlotIds.value // Enviamos todos los slots seleccionados
     };
 
     const response = await bookingService.create(reservationData);
@@ -127,7 +147,7 @@ const closeModal = () => {
     setTimeout(() => {
       success.value = false;
       error.value = null;
-      selectedSlotId.value = null;
+      selectedSlotIds.value = [];
     }, 300);
   }
 };
@@ -202,8 +222,10 @@ onMounted(() => {
             <i class="pi pi-clock"></i>
           </div>
           <div class="detail-text">
-            <span class="detail-label">Horario:</span>
-            <span class="detail-value">{{ timeSlots.find(slot => slot.id === selectedSlotId)?.label }}</span>
+            <span class="detail-label">Horarios:</span>
+            <span class="detail-value">
+        {{ selectedSlotIds.map(id => timeSlots.find(slot => slot.id === id)?.label).join(', ') }}
+      </span>
           </div>
         </div>
 
@@ -252,20 +274,21 @@ onMounted(() => {
                 v-for="slot in timeSlots"
                 :key="slot.id"
                 :class="{
-                    'time-slot': true,
-                    'slot-available': slot.available && selectedSlotId !== slot.id,
-                    'slot-unavailable': !slot.available,
-                    'selected': selectedSlotId === slot.id,
-                  }"
-                @click="slot.available && selectTimeSlot(slot.id)"
+            'time-slot': true,
+            'slot-available': slot.available && !selectedSlotIds.includes(slot.id),
+            'slot-unavailable': !slot.available,
+            'selected': selectedSlotIds.includes(slot.id),
+          }"
+                @click="slot.available && toggleTimeSlot(slot.id)"
             >
               <span class="slot-time">{{ slot.label }}</span>
               <span class="slot-status">
-                  <i v-if="slot.available" ></i>
-                  <i v-else class="pi pi-times-circle"></i>
-                </span>
+          <i v-if="selectedSlotIds.includes(slot.id)" class="pi pi-check-circle"></i>
+          <i v-else-if="!slot.available" class="pi pi-times-circle"></i>
+      </span>
             </div>
           </div>
+
         </div>
 
         <div v-if="error" class="error-message">
@@ -279,11 +302,12 @@ onMounted(() => {
           <button
               class="btn-reserve"
               @click="submitReservation"
-              :disabled="loading || !selectedSlotId || timeSlots.length === 0"
+              :disabled="loading || selectedSlotIds.length === 0 || timeSlots.length === 0"
           >
             <i class="pi" :class="loading ? 'pi-spinner pi-spin' : 'pi-check'"></i>
-            {{ loading ? 'Procesando...' : 'Confirmar' }}
+            {{ loading ? 'Procesando...' : `Confirmar (${selectedSlotIds.length} horario${selectedSlotIds.length !== 1 ? 's' : ''})` }}
           </button>
+
         </div>
       </div>
     </div>

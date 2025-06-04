@@ -16,6 +16,7 @@ const props = defineProps({
 
 const emit = defineEmits(['select-table', 'reserve-table']);
 
+// Uso de propiedades de TablesEntity
 const isAvailable = computed(() => props.table.status?.toLowerCase() === 'available');
 const tableClass = computed(() => `table-card ${isAvailable.value ? 'available' : 'occupied'}`);
 
