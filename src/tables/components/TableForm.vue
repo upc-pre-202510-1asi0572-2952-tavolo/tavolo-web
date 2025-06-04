@@ -4,6 +4,14 @@ import { TableEntity } from '../model/table.entity.js';
 
 const emit = defineEmits(['save', 'cancel']);
 
+// Definir props primero
+const props = defineProps({
+  predefinedHeadquarterId: {
+    type: Number,
+    default: null
+  }
+});
+
 // Datos del formulario
 const tableNumber = ref('');
 const seats = ref('');
@@ -16,12 +24,6 @@ const zones = [
   { name: 'Terraza', value: 'Terraza' },
   { name: 'Ventana', value: 'Ventana' }
 ];
-const props = defineProps({
-  predefinedHeadquarterId: {
-    type: Number,
-    default: null
-  }
-});
 
 
 // Validación de formulario
