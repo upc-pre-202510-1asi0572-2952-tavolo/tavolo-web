@@ -19,7 +19,7 @@ const handleDelete = () => {
 </script>
 
 <template>
-  <div class="table-card">
+  <div class="table-card" :class="'zone-' + table.zone?.toLowerCase()">
     <div class="table-header">
       <h3>Mesa #{{ table.tableNumber }}</h3>
     </div>
@@ -27,7 +27,7 @@ const handleDelete = () => {
       <div class="table-info">
         <p><strong>ID:</strong> {{ table.id }}</p>
         <p>Capacidad: {{ table.seats }} personas</p>
-        <p>Zona: {{ table.zone }}</p>
+        <p>Zona: <span class="zone-indicator" :class="'zone-' + table.zone?.toLowerCase()"></span> {{ table.getZoneDisplayName() }}</p>
         <p>Estado: {{ table.status }}</p>
       </div>
       <div class="table-actions">
@@ -52,8 +52,41 @@ const handleDelete = () => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease;
   color: #333333;
+  border-top: 4px solid #ddd;
 }
 
+/* Estilos según la zona */
+.table-card.zone-main_hall {
+  border-top-color: #4287f5; /* Azul para MAIN_HALL */
+}
+
+.table-card.zone-window {
+  border-top-color: #42d77d; /* Verde para WINDOW */
+}
+
+.table-card.zone-terrace {
+  border-top-color: #f5a742; /* Naranja para TERRACE */
+}
+
+.zone-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.zone-indicator.zone-main_hall {
+  background-color: #4287f5; /* Azul para MAIN_HALL */
+}
+
+.zone-indicator.zone-window {
+  background-color: #42d77d; /* Verde para WINDOW */
+}
+
+.zone-indicator.zone-terrace {
+  background-color: #f5a742; /* Naranja para TERRACE */
+}
 
 .table-header h3 {
   font-size: 18px;

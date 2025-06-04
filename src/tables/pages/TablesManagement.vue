@@ -77,7 +77,7 @@ export default {
                 tableData.tableNumber,
                 tableData.seats,
                 tableData.status,
-                tableData.zone || 'Sala principal'
+                tableData.zone || 'MAIN_HALL'
               );
             }) : [];
         } else {
@@ -86,7 +86,11 @@ export default {
         }
       } catch (error) {
         console.error('Error al cargar tablas de la sede:', error);
-        throw error;
+        tables.value = []; // Establecer un array vacío en lugar de propagar el error
+        // Solo mostrar mensaje de error si no es un problema de conectividad o backend caído
+        if (error.response && error.response.status !== 500) {
+          throw error;
+        }
       } finally {
         loading.value = false;
       }
@@ -97,8 +101,31 @@ export default {
       try {
         // Asegurar que la mesa pertenezca a la sede del supervisor
         newTable.headquarterId = headquarterId.value;
-        await tableService.createTable(newTable);
-        await loadTablesByHeadquarter();
+        const createdTable = await tableService.createTable(newTable);
+        
+        // Si la creación fue exitosa, agregar la mesa a la lista actual sin recargar
+        if (createdTable) {
+          // Si tenemos datos de la mesa creada, la agregamos al array
+          if (typeof createdTable === 'object' && createdTable.id) {
+            tables.value.push(new TableEntity(
+              createdTable.id,
+              createdTable.headquarterId,
+              createdTable.tableNumber,
+              createdTable.seats,
+              createdTable.status,
+              createdTable.zone || 'MAIN_HALL'
+            ));
+          }
+          // Si no, intentamos recargar (pero evitamos propagar errores si falla)
+          else {
+            try {
+              await loadTablesByHeadquarter();
+            } catch (loadError) {
+              console.error("Error al recargar mesas después de crear:", loadError);
+            }
+          }
+        }
+        
         showModal.value = false;
         showSuccessMessage('Mesa agregada correctamente');
       } catch (error) {
@@ -113,7 +140,10 @@ export default {
           // Asegurarse de que tableId sea un número si es necesario
           const id = typeof tableId === 'string' ? parseInt(tableId, 10) : tableId;
           await tableService.deleteTable(id);
-          await loadTablesByHeadquarter();
+          
+          // Actualizar inmediatamente la lista de mesas eliminando la mesa borrada
+          tables.value = tables.value.filter(table => table.id !== id);
+          
           showSuccessMessage('Mesa eliminada correctamente');
         }
       } catch (error) {
