@@ -92,18 +92,6 @@ const toggleSidebar = () => {
                 class="p-button-text nav-item"
                 @click="navigateTo('home')"
             />
-            <pv-button
-                label="Gestión de Mesas"
-                icon="pi pi-table"
-                class="p-button-text nav-item"
-                @click="navigateTo('table-management')"
-            />
-            <pv-button
-                label="Ver Reservas"
-                icon="pi pi-calendar"
-                class="p-button-text nav-item"
-                @click="navigateTo('reservations')"
-            />
           </div>
         </div>
 
@@ -164,12 +152,6 @@ const toggleSidebar = () => {
           <ul class="mobile-menu-list">
             <li @click="navigateTo('home')">
               <i class="pi pi-home mr-2"></i>Inicio
-            </li>
-            <li @click="navigateTo('table-management')">
-              <i class="pi pi-table mr-2"></i>Gestión de Mesas
-            </li>
-            <li @click="navigateTo('reservations')">
-              <i class="pi pi-calendar mr-2"></i>Ver Reservas
             </li>
           </ul>
         </div>

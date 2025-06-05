@@ -5,10 +5,16 @@ import {onMounted, ref} from 'vue';
 import AssignedHeadquarterCard from "@/branching/components/assigned-headquarter-card.vue";
 import HeadquarterTableList from "@/booking/components/headquarter-table-list.vue";
 import {useRouter} from "vue-router";
+import HeadquarterCard from "@/branching/components/headquarter-card.vue";
+import HeadquarterCardList from "@/branching/components/headquarter-card-list.vue";
+import SupervisorCardList from "@/branching/components/supervisor-card-list.vue";
 
 export default {
   name: "HomeComponent",
   components: {
+    SupervisorCardList,
+    HeadquarterCardList,
+    HeadquarterCard,
     HeadquarterTableList,
     BookingCarousel,
     AssignedHeadquarterCard,
@@ -50,8 +56,9 @@ export default {
     <div class="home-content">
       <!-- Solo visible para administradores -->
       <div v-rbac="[RoleEnum.ADMIN]" class="admin-panel">
-        <h2 class="panel-title">Panel de administración</h2>
-        <p>Bienvenido al panel de administración. Aquí puedes gestionar configuraciones avanzadas.</p>
+        <h2>Panel de Administración</h2>
+        <p>Acceso exclusivo para administradores.</p>
+        <pv-button @click="navigateTo('admin-dashboard')" label="Ir al panel de administración" />
       </div>
 
       <!-- Visible supervisores -->
