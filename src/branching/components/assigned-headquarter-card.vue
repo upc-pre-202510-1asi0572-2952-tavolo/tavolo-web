@@ -10,16 +10,20 @@ export default {
     return {
       apiService: new BranchingApiService(),
       headquarter: new HeadquarterEntity(
-        '',
-        '',
-        '',
-        '',
-        0,
-        0,
-        '',
-        '',
-        '',
-        0
+          '',
+          '',
+          '',
+          '',
+          0,
+          0,
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          30
       ),
       loading: true,
       error: null,
@@ -102,19 +106,50 @@ export default {
         }
 
         const data = response.data;
+        console.log('Headquarter data received:', data);
+
+        // Extract address components if streetAddress exists
+        let street = '', number = '', city = '', postalCode = '', country = '';
+
+        if (data.streetAddress) {
+          // Try to parse the combined address (this is a simple example)
+          const addressParts = data.streetAddress.split(',').map(part => part.trim());
+
+          if (addressParts.length >= 1) {
+            // First part usually contains street and number
+            const streetPart = addressParts[0];
+            const match = streetPart.match(/^(.*?)(\d+)?$/);
+            if (match) {
+              street = match[1]?.trim() || '';
+              number = match[2] || '';
+            } else {
+              street = streetPart;
+            }
+          }
+
+          if (addressParts.length >= 2) city = addressParts[1];
+          if (addressParts.length >= 3) postalCode = addressParts[2];
+          if (addressParts.length >= 4) country = addressParts[3];
+        }
 
         this.headquarter = new HeadquarterEntity(
-          data.id,
-          data.name,
-          data.landlinePhone,
-          data.mobilePhone,
-          data.latitude,
-          data.longitude,
-          data.streetAddress,
-          data.openingTime,
-          data.closingTime,
-          data.intervalMinutes
+            data.id || '',
+            data.name || 'Unnamed Headquarter',
+            data.landlinePhone || 'No landline',
+            data.mobilePhone || 'No mobile',
+            parseFloat(data.latitude) || 0,
+            parseFloat(data.longitude) || 0,
+            street,
+            number,
+            city,
+            postalCode,
+            country,
+            data.openingTime || 'N/A',
+            data.closingTime || 'N/A',
+            parseInt(data.intervalMinutes) || 30
         );
+
+        console.log('Headquarter entity created:', this.headquarter);
       } catch (error) {
         console.error('Error fetching headquarter:', error);
 
@@ -126,7 +161,7 @@ export default {
       } finally {
         this.loading = false;
       }
-    }
+    },
   },
   mounted() {
     this.fetchHeadquarterBySupervisor();
@@ -138,26 +173,26 @@ export default {
 <template>
   <div class="headquarter-card" v-if="!loading && !error">
     <div class="card-header">
-      <h2>{{ headquarter.name }}</h2>
+      <h2>{{ headquarter.name || 'Headquarter' }}</h2>
     </div>
 
     <div class="card-content">
       <div class="info-section">
         <div class="info-item">
           <i class="pi pi-map-marker"></i>
-          <span>{{ headquarter.streetAddress }}</span>
+          <span>{{ headquarter.street }} {{ headquarter.number }}, {{ headquarter.city }}, {{ headquarter.postalCode }}, {{ headquarter.country }}</span>
         </div>
         <div class="info-item">
           <i class="pi pi-phone"></i>
-          <span>{{ headquarter.landlinePhone }}</span>
+          <span>{{ headquarter.landlinePhone || 'No landline phone' }}</span>
         </div>
         <div class="info-item">
           <i class="pi pi-mobile"></i>
-          <span>{{ headquarter.mobilePhone }}</span>
+          <span>{{ headquarter.mobilePhone || 'No mobile phone' }}</span>
         </div>
         <div class="info-item">
           <i class="pi pi-clock"></i>
-          <span>{{ headquarter.openingTime }} - {{ headquarter.closingTime }}</span>
+          <span>{{ headquarter.openingTime || 'N/A' }} - {{ headquarter.closingTime || 'N/A' }}</span>
         </div>
       </div>
     </div>
