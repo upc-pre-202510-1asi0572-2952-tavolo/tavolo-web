@@ -1,5 +1,6 @@
 <!-- src/booking/components/headquarter-card.component.vue -->
 <script setup>
+import { ref, onUnmounted } from 'vue';
 import { HeadquartersService } from '../services/headquarter.service';
 import { useRouter } from 'vue-router';
 
@@ -12,6 +13,9 @@ const props = defineProps({
 
 const headquarterService = new HeadquartersService();
 const router = useRouter();
+const showMap = ref(false);
+const mapContainer = ref(null);
+const map = ref(null);
 
 const navigateToTables = () => {
   router.push(`/headquarters/${props.headquarter.id}/tables`);
@@ -21,6 +25,14 @@ const navigateToMap = () => {
   router.push(`/headquarters/${props.headquarter.id}/map`);
 };
 
+const toggleMap = () => {
+  showMap.value = !showMap.value;
+  if (showMap.value) {
+    // Inicializa el mapa cuando se muestra
+    setTimeout(initializeMap, 100);
+  }
+};
+
 const getFullAddress = () => {
   return headquarterService.getFullAddress(props.headquarter);
 };
@@ -28,6 +40,38 @@ const getFullAddress = () => {
 const getSchedule = () => {
   return headquarterService.getScheduleString(props.headquarter);
 };
+
+const initializeMap = () => {
+  if (!mapContainer.value || map.value) return;
+
+  // Reemplaza con tu token de Mapbox
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyYmFyYTE1IiwiYSI6ImNtYms0M2VwNTBtZzYybXB6Znh5ZTBuNjgifQ.lwTbVmhNLHpdzMgmkWdvUw';
+
+  // Coordenadas de la sede (debes asegurarte que existan en el objeto headquarter)
+  const lng = props.headquarter.longitude || -74.0721;
+  const lat = props.headquarter.latitude || 4.7110;
+
+  map.value = new mapboxgl.Map({
+    container: mapContainer.value,
+    style: 'mapbox://styles/mapbox/streets-v11',
+    center: [lng, lat],
+    zoom: 15
+  });
+
+  // Añadir marcador
+  new mapboxgl.Marker()
+      .setLngLat([lng, lat])
+      .addTo(map.value);
+
+  // Añadir controles de navegación
+  map.value.addControl(new mapboxgl.NavigationControl());
+};
+
+onUnmounted(() => {
+  if (map.value) {
+    map.value.remove();
+  }
+});
 </script>
 
 <template>
@@ -47,6 +91,12 @@ const getSchedule = () => {
           </ul>
         </div>
       </div>
+
+      <!-- Mapa integrado (opcional) -->
+      <div v-if="showMap" class="map-container-wrapper">
+        <div ref="mapContainer" class="map-container"></div>
+      </div>
+
       <div class="card-actions">
         <button class="btn btn-tables" @click="navigateToTables">
           <i class="pi pi-list"></i> Ver mesas
@@ -60,6 +110,27 @@ const getSchedule = () => {
 </template>
 
 <style scoped>
+.map-container-wrapper {
+  margin-top: 20px;
+  width: 100%;
+  height: 300px;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: height 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 768px) {
+
+  .map-container-wrapper {
+    height: 250px;
+  }
+}
 .headquarter-card {
   display: flex;
   flex-direction: row;

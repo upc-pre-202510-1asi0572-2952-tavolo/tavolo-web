@@ -1,29 +1,64 @@
-# tavolo-web
+# Tavolo Web
 
-This template should help get you started developing with Vue 3 in Vite.
+## Descripción del Proyecto
 
-## Recommended IDE Setup
+Tavolo Web es una aplicación web desarrollada con Vue 3 que permite gestionar reservas y visualizar sedes en un mapa interactivo.
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Tecnologías y Lenguajes
 
-## Customize configuration
+- **Frontend Framework**: Vue 3
+- **Build Tool**: Vite
+- **Lenguajes**: JavaScript, HTML, CSS
+- **Componentes UI**: PrimeIcons para iconografía
+- **Mapas**: Mapbox GL
+- **Enrutamiento**: Vue Router
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Dependencias Principales
 
-## Project Setup
+- Vue 3 (Composition API)
+- Mapbox GL (visualización de mapas)
+- Vue Router (navegación entre páginas)
+- PrimeIcons (iconografía)
+
+## Estructura del Proyecto
+
+El proyecto sigue una estructura organizada por módulos:
+- `/src/booking/components`: Componentes reutilizables relacionados con reservas
+- `/src/booking/pages`: Páginas principales del módulo de reservas
+- `/src/booking/services`: Servicios para manejo de datos y lógica de negocio
+
+## Características Principales
+
+- Visualización de sedes en mapas interactivos
+- Información detallada de cada sede
+- Interfaz responsiva adaptada a dispositivos móviles
+
+## Configuración del Entorno de Desarrollo
+
+### IDE Recomendado
+
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (desactivar Vetur).
+
+### Instalación de Dependencias
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Compilación y Hot-Reload para Desarrollo
 
 ```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
+### Compilación y Minificación para Producción
 
 ```sh
 npm run build
+```
+
+### Mapbox9
+
+```sh
+npm install mapbox-gl
 ```
