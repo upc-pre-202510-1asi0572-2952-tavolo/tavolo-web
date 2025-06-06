@@ -92,6 +92,18 @@ const toggleSidebar = () => {
                 class="p-button-text nav-item"
                 @click="navigateTo('home')"
             />
+            <pv-button
+                label="Dashboard"
+                icon="pi pi-building"
+                class="p-button-text nav-item"
+                @click="navigateTo('dashboard-admin')"
+            />
+            <pv-button
+                label="Menú"
+                icon="pi pi-book"
+                class="p-button-text nav-item"
+                @click="navigateTo('menu')"
+            />
           </div>
         </div>
 

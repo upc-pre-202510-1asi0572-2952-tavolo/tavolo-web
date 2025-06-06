@@ -26,4 +26,7 @@ export class MenuService {
     deleteMenuItem(itemId) {
         return http.delete(`${this.resourceEndpoint}/${itemId}`);
     }
+    getAllCategories() {
+        return http.get(`${this.resourceEndpoint}/categories`);
+    }
 }
