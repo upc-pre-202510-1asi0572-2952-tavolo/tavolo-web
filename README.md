@@ -57,7 +57,7 @@ npm run dev
 npm run build
 ```
 
-### Mapbox
+### Mapbox9
 
 ```sh
 npm install mapbox-gl
