@@ -39,6 +39,15 @@ export function createAppRouter() {
                 }
             },
             {
+                path: '/headquarters/:id/map',
+                name: 'headquarter-map',
+                component: () => import('@/booking/pages/headquarter-map.vue'),
+                meta: {
+                    title: 'Mapa de la Sede',
+                    requiresAuth: true,
+                }
+            },
+            {
                 path: '/headquarters/:id/tables',
                 name: 'headquarter-tables',
                 component: () => import('@/booking/pages/headquarter-tables.vue'),
