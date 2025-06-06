@@ -80,26 +80,6 @@ export default {
 </template>
 
 <style scoped>
-.home-container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: calc(100vh - 64px);
-  background-color: var(--background-color);
-}
-
-.home-content {
-  width: 100%;
-  max-width: none;
-  padding: 0 32px;
-  text-align: center;
-  background: var(--surface-color);
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  min-height: calc(85vh - 64px);
-}
-
 .admin-panel {
   background-color: var(--primaryColor50);
   border: 1px solid var(--primaryColor200);
@@ -108,44 +88,5 @@ export default {
   border-radius: 8px;
   text-align: left;
   flex-grow: 0;
-}
-
-.actions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 24px;
-  flex-grow: 1;
-  width: 100%;
-}
-
-.title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.subtitle {
-  margin: 0;
-  text-align: left;
-}
-
-.btn-ver-mas:hover {
-  background-color: var(--primaryColor400);
-  border-color: var(--primaryColor400);
-  color: var(--primaryColor50);
-  transform: scale(1.05);
-  transition: transform 0.2s ease-in-out;
-}
-
-.btn-ver-mas {
-  margin-left: auto;
-  background-color: var(--primaryColor500);
-  border-color: var(--primaryColor500);
-  color: var(--primaryColor50);
-  border-radius: 1.5em;
-  transition: transform 0.2s ease-in-out, background-color 0.2s, border-color 0.2s;
 }
 </style>
