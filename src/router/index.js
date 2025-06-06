@@ -4,7 +4,6 @@ import SignUpComponent from "../iam/pages/sign-up.component.vue";
 import { authenticationGuard } from "../iam/services/authentication.guard.js";
 import { authorizationGuard } from "../iam/services/authentication.authorization.js";
 import { RoleEnum } from "../iam/model/role.enum";
-import HeadquarterManagement from "@/branching/pages/headquarter-management.vue";
 
 export function createAppRouter() {
     const router = createRouter({
@@ -99,9 +98,9 @@ export function createAppRouter() {
                 }
             },
             {
-                path: '/admin-dashboard',
-                name: 'admin-dashboard',
-                component: () => HeadquarterManagement,
+                path: '/dashboard-admin',
+                name: 'dashboard-admin',
+                component: () => import ('../branching/pages/headquarter-management.vue'),
                 meta: {
                     title: 'Dashboard de Administración',
                     requiresAuth: true,

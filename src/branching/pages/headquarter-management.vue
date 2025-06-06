@@ -629,21 +629,6 @@ export default {
   </div>
 </template>
 <style scoped>
-/* Dashboard Container */
-.dashboard-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, var(--background-color-light) 0%, var(--background-color) 100%);
-}
-
-/* Header Styles */
-.dashboard-header {
-  background: var(--surface-color);
-  border-bottom: 1px solid var(--primaryColor100);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  position: sticky;
-  top: 0;
-  z-index: 40;
-}
 
 .header-content {
   max-width: 1200px;

@@ -36,24 +36,34 @@ export const useAuthenticationStore = defineStore(
         actions: {
 
             async signIn(signInRequest, router) {
-            authenticationService.signIn(signInRequest)
+              authenticationService.signIn(signInRequest)
                 .then(response => {
-                    let signInResponse = new SignInResponse(
-                        response.data.id, 
-                        response.data.username, 
-                        response.data.token,
-                        response.data.roles || []
-                    );
-                    this.signedIn = true;
-                    this.userId = signInResponse.id;
-                    this.username = signInResponse.username;
-                    this.roles = signInResponse.roles;
-                    localStorage.setItem('token', signInResponse.token);
-                    router.push({ name: 'home' });
+                  let signInResponse = new SignInResponse(
+                    response.data.id,
+                    response.data.username,
+                    response.data.token,
+                    response.data.roles || []
+                  );
+                  this.signedIn = true;
+                  this.userId = signInResponse.id;
+                  this.username = signInResponse.username;
+                  this.roles = signInResponse.roles;
+
+                  // Store token
+                  localStorage.setItem('token', signInResponse.token);
+
+                  // Store complete user object with roles
+                  localStorage.setItem('user', JSON.stringify({
+                    id: signInResponse.id,
+                    username: signInResponse.username,
+                    roles: signInResponse.roles
+                  }));
+
+                  router.push({ name: 'home' });
                 })
                 .catch(error => {
-                    console.error('Error en signIn:', error);
-                    throw error;
+                  console.error('Error en signIn:', error);
+                  throw error;
                 });
             },
 
@@ -72,12 +82,13 @@ export const useAuthenticationStore = defineStore(
             },
 
             async signOut(router) {
-            this.signedIn = false;
-            this.userId = 0;
-            this.username = '';
-            this.roles = [];
-            localStorage.removeItem('token');
-            router.push({ name: 'sign-in' });
+              this.signedIn = false;
+              this.userId = 0;
+              this.username = '';
+              this.roles = [];
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              router.push({ name: 'sign-in' });
             }
         }
     }
