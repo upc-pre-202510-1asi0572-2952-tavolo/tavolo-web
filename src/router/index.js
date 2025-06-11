@@ -107,7 +107,12 @@ export function createAppRouter() {
                     roles: [RoleEnum.ADMIN]
 
                 }
-            }
+            },
+            {
+                path: '/create-headquarter',
+                name: 'CreateHeadquarter',
+                component: ()=> import ('../branching/components/headquarter-form.vue'),
+            },
         ]
     });
 
