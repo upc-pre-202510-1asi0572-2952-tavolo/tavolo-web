@@ -1,187 +1,16 @@
 <script>
-import { ref, reactive } from 'vue';
-import { BranchingApiService } from "@/branching/services/branching-api.service.js";
+import { BranchingApiService } from '@/branching/services/branching-api.service.js';
+import { HeadquarterEntity } from '@/branching/model/headquarter.entity.js';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 export default {
-  name: "headquarter-form",
-  emits: ['headquarter-created', 'cancel'],
-  setup(props, { emit }) {
-    const apiService = new BranchingApiService();
-    const loading = ref(false);
-    const success = ref(false);
-    const error = ref('');
-
-    // Initialize the headquarter object with the correct field names
-    const headquarter = reactive({
-      name: '',
-      landlinePhone: '',
-      mobilePhone: '',
-      latitude: null,
-      longitude: null,
-      street: '', // Changed from streetAddress to street
-      number: '',
-      city: '',
-      postalCode: '',
-      country: '',
-      openingTime: '',
-      closingTime: '',
-      intervalMinutes: null
-    });
-
-    // Validation state
-    const validation = reactive({
-      name: { valid: true, message: '' },
-      landlinePhone: { valid: true, message: '' },
-      mobilePhone: { valid: true, message: '' },
-      latitude: { valid: true, message: '' },
-      longitude: { valid: true, message: '' },
-      street: { valid: true, message: '' }, // Changed from streetAddress to street
-      number: { valid: true, message: '' },
-      city: { valid: true, message: '' },
-      postalCode: { valid: true, message: '' },
-      country: { valid: true, message: '' },
-      openingTime: { valid: true, message: '' },
-      closingTime: { valid: true, message: '' },
-      intervalMinutes: { valid: true, message: '' }
-    });
-
-    // Validate form
-    const validateForm = () => {
-      let isValid = true;
-
-      // Required fields
-      if (!headquarter.name.trim()) {
-        validation.name.valid = false;
-        validation.name.message = 'El nombre es requerido';
-        isValid = false;
-      } else {
-        validation.name.valid = true;
-        validation.name.message = '';
-      }
-
-      if (!headquarter.street.trim()) {
-        validation.street.valid = false;
-        validation.street.message = 'La dirección es requerida';
-        isValid = false;
-      } else {
-        validation.street.valid = true;
-        validation.street.message = '';
-      }
-
-      if (!headquarter.city.trim()) {
-        validation.city.valid = false;
-        validation.city.message = 'La ciudad es requerida';
-        isValid = false;
-      } else {
-        validation.city.valid = true;
-        validation.city.message = '';
-      }
-
-      if (!headquarter.country.trim()) {
-        validation.country.valid = false;
-        validation.country.message = 'El país es requerido';
-        isValid = false;
-      } else {
-        validation.country.valid = true;
-        validation.message = '';
-      }
-
-      // Validate phone numbers (optional but must be valid if provided)
-      if (headquarter.landlinePhone && !/^[+]?[\d\s-]+$/.test(headquarter.landlinePhone)) {
-        validation.landlinePhone.valid = false;
-        validation.landlinePhone.message = 'Número de teléfono inválido';
-        isValid = false;
-      } else {
-        validation.landlinePhone.valid = true;
-        validation.landlinePhone.message = '';
-      }
-
-      if (headquarter.mobilePhone && !/^[+]?[\d\s-]+$/.test(headquarter.mobilePhone)) {
-        validation.mobilePhone.valid = false;
-        validation.mobilePhone.message = 'Número de móvil inválido';
-        isValid = false;
-      } else {
-        validation.mobilePhone.valid = true;
-        validation.mobilePhone.message = '';
-      }
-
-      // Validate coordinates
-      if (headquarter.latitude !== null && (isNaN(headquarter.latitude) || headquarter.latitude < -90 || headquarter.latitude > 90)) {
-        validation.latitude.valid = false;
-        validation.latitude.message = 'Latitud inválida (debe estar entre -90 y 90)';
-        isValid = false;
-      } else {
-        validation.latitude.valid = true;
-        validation.latitude.message = '';
-      }
-
-      if (headquarter.longitude !== null && (isNaN(headquarter.longitude) || headquarter.longitude < -180 || headquarter.longitude > 180)) {
-        validation.longitude.valid = false;
-        validation.longitude.message = 'Longitud inválida (debe estar entre -180 y 180)';
-        isValid = false;
-      } else {
-        validation.longitude.valid = true;
-        validation.longitude.message = '';
-      }
-
-      // Validate time format
-      const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
-      if (!timeRegex.test(headquarter.openingTime)) {
-        validation.openingTime.valid = false;
-        validation.openingTime.message = 'Formato de hora inválido (HH:MM)';
-        isValid = false;
-      } else {
-        validation.openingTime.valid = true;
-        validation.openingTime.message = '';
-      }
-
-      if (!timeRegex.test(headquarter.closingTime)) {
-        validation.closingTime.valid = false;
-        validation.closingTime.message = 'Formato de hora inválido (HH:MM)';
-        isValid = false;
-      } else {
-        validation.closingTime.valid = true;
-        validation.closingTime.message = '';
-      }
-
-      // Validate interval minutes
-      if (headquarter.intervalMinutes === null || headquarter.intervalMinutes <= 0) {
-        validation.intervalMinutes.valid = false;
-        validation.intervalMinutes.message = 'El intervalo debe ser mayor a 0';
-        isValid = false;
-      } else {
-        validation.intervalMinutes.valid = true;
-        validation.intervalMinutes.message = '';
-      }
-
-      return isValid;
-    };
-
-    // Submit form
-    const submitForm = async () => {
-      if (!validateForm()) return;
-
-      loading.value = true;
-      error.value = '';
-
-      try {
-        const response = await apiService.createHeadquarter(headquarter);
-
-        if (response && response.data) {
-          success.value = true;
-          emit('headquarter-created', response.data);
-          resetForm();
-        }
-      } catch (err) {
-        console.error('Error creating headquarter:', err);
-        error.value = err.response?.data?.message || 'Error al crear la sede';
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    const resetForm = () => {
-      Object.assign(headquarter, {
+  name: 'SedeForm',
+  data() {
+    return {
+      map: null,
+      marker: null,
+      form: {
         name: '',
         landlinePhone: '',
         mobilePhone: '',
@@ -194,292 +23,426 @@ export default {
         country: '',
         openingTime: '',
         closingTime: '',
-        intervalMinutes: null
+        intervalMinutes: ''
+      },
+      errors: {}
+    };
+  },
+  computed: {
+    isFormValid() {
+      const requiredFields = ['name', 'street', 'number', 'city', 'postalCode', 'country', 'openingTime', 'closingTime', 'intervalMinutes'];
+      const hasRequiredFields = requiredFields.every(field => this.form[field]);
+      const hasCoordinates = this.form.latitude !== null && this.form.longitude !== null;
+      const hasNoErrors = Object.keys(this.errors).length === 0;
+
+      return hasRequiredFields && hasCoordinates && hasNoErrors;
+    }
+  },
+  mounted() {
+    this.initializeMap();
+    // Handle window resize to maintain map dimensions
+    window.addEventListener('resize', () => {
+      if (this.map) {
+        setTimeout(() => this.map.resize(), 100);
+      }
+    });
+  },
+  beforeUnmount() {
+    if (this.map) {
+      this.map.remove();
+    }
+  },
+  methods: {
+    async createAndFetchHeadquarter() {
+      const apiService = new BranchingApiService();
+
+      try {
+        const createdHeadquarter = await apiService.createHeadquarter(this.form);
+        const fetchedHeadquarter = await apiService.getHeadquarterById(createdHeadquarter.data.id);
+        const headquarterEntity = new HeadquarterEntity(
+            fetchedHeadquarter.data.id,
+            fetchedHeadquarter.data.name,
+            fetchedHeadquarter.data.landlinePhone,
+            fetchedHeadquarter.data.mobilePhone,
+            fetchedHeadquarter.data.latitude,
+            fetchedHeadquarter.data.longitude,
+            fetchedHeadquarter.data.street,
+            fetchedHeadquarter.data.number,
+            fetchedHeadquarter.data.city,
+            fetchedHeadquarter.data.postalCode,
+            fetchedHeadquarter.data.country,
+            fetchedHeadquarter.data.openingTime,
+            fetchedHeadquarter.data.closingTime,
+            fetchedHeadquarter.data.intervalMinutes
+        );
+
+        this.$emit('headquarter-created', headquarterEntity);
+        console.log('Headquarter created and fetched:', headquarterEntity);
+
+        // Redirect to headquarter-management page
+        this.$router.push('/dashboard-admin');
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+          console.error('Conflict error:', error.response.data.message);
+          alert('Error: The headquarter already exists or conflicts with existing data.');
+        } else {
+          console.error('Error creating or fetching headquarter:', error);
+          alert('An unexpected error occurred. Please try again.');
+        }
+      }
+    },
+    initializeMap() {
+      mapboxgl.accessToken = 'pk.eyJ1IjoiYmFyYmFyYTE1IiwiYSI6ImNtYms0M2VwNTBtZzYybXB6Znh5ZTBuNjgifQ.lwTbVmhNLHpdzMgmkWdvUw';
+      this.map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [-77.0428, -12.0464],
+        zoom: 12,
+        attributionControl: false
       });
-
-      // Reset validation
-      Object.keys(validation).forEach(key => {
-        validation[key].valid = true;
-        validation[key].message = '';
+      this.map.on('load', () => {
+        this.map.resize();
+        this.map.on('click', (e) => {
+          const { lng, lat } = e.lngLat;
+          this.updateCoordinates(lng, lat);
+        });
       });
+    },
+    updateCoordinates(lng, lat) {
+      // Store coordinates with proper precision
+      this.form.longitude = Number(lng.toFixed(6));
+      this.form.latitude = Number(lat.toFixed(6));
 
-      success.value = false;
-      error.value = '';
-    };
+      // Remove existing marker if present
+      if (this.marker) {
+        this.marker.remove();
+      }
 
-    const cancel = () => {
-      emit('cancel');
-    };
+      // Create a new marker with proper configuration
+      this.marker = new mapboxgl.Marker({
+        color: '#FF0000',
+        draggable: false
+      })
+        .setLngLat([lng, lat])
+        .addTo(this.map);
+    },
+    validateName() {
+      const numberRegex = /\d/;
+      if (!this.form.name) {
+        this.errors.name = 'El nombre es requerido';
+      } else if (numberRegex.test(this.form.name)) {
+        this.errors.name = 'El nombre no puede contener números';
+      } else {
+        delete this.errors.name;
+      }
+    },
+    validateLandlinePhone() {
+      const numberRegex = /^\d+$/;
+      if (this.form.landlinePhone) {
+        if (!numberRegex.test(this.form.landlinePhone)) {
+          this.errors.landlinePhone = 'Solo se permiten números';
+        } else if (this.form.landlinePhone.length > 7) {
+          this.errors.landlinePhone = 'Máximo 7 números';
+        } else {
+          delete this.errors.landlinePhone;
+        }
+      } else {
+        delete this.errors.landlinePhone;
+      }
+    },
+    validateMobilePhone() {
+      const numberRegex = /^\d+$/;
+      if (this.form.mobilePhone) {
+        if (!numberRegex.test(this.form.mobilePhone)) {
+          this.errors.mobilePhone = 'Solo se permiten números';
+        } else if (this.form.mobilePhone.length > 9) {
+          this.errors.mobilePhone = 'Máximo 9 números';
+        } else {
+          delete this.errors.mobilePhone;
+        }
+      } else {
+        delete this.errors.mobilePhone;
+      }
+    },
+    validateStreet() {
+      const letterRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+      if (!this.form.street) {
+        this.errors.street = 'La calle es requerida';
+      } else if (!letterRegex.test(this.form.street)) {
+        this.errors.street = 'Solo se permiten letras';
+      } else {
+        delete this.errors.street;
+      }
+    },
+    validateNumber() {
+      const numberRegex = /^\d+$/;
+      if (!this.form.number) {
+        this.errors.number = 'El número es requerido';
+      } else if (!numberRegex.test(this.form.number)) {
+        this.errors.number = 'Solo se permiten números';
+      } else {
+        delete this.errors.number;
+      }
+    },
+    validateCity() {
+      const letterRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+      if (!this.form.city) {
+        this.errors.city = 'La ciudad es requerida';
+      } else if (!letterRegex.test(this.form.city)) {
+        this.errors.city = 'Solo se permiten letras';
+      } else {
+        delete this.errors.city;
+      }
+    },
+    validatePostalCode() {
+      const numberRegex = /^\d{4}$/;
+      if (!this.form.postalCode) {
+        this.errors.postalCode = 'El código postal es requerido';
+      } else if (!numberRegex.test(this.form.postalCode)) {
+        this.errors.postalCode = 'Debe contener exactamente 4 números';
+      } else {
+        delete this.errors.postalCode;
+      }
+    },
+    validateCountry() {
+      const letterRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+      if (!this.form.country) {
+        this.errors.country = 'El país es requerido';
+      } else if (!letterRegex.test(this.form.country)) {
+        this.errors.country = 'Solo se permiten letras';
+      } else {
+        delete this.errors.country;
+      }
+    },
+    validateIntervalMinutes() {
+      const numberRegex = /^\d+$/;
+      if (!this.form.intervalMinutes) {
+        this.errors.intervalMinutes = 'El intervalo es requerido';
+      } else if (!numberRegex.test(this.form.intervalMinutes)) {
+        this.errors.intervalMinutes = 'Solo se permiten números';
+      } else if (parseInt(this.form.intervalMinutes) < 1) {
+        this.errors.intervalMinutes = 'El intervalo debe ser mayor a 0';
+      } else {
+        delete this.errors.intervalMinutes;
+      }
+    },
+    resetForm() {
+      this.form = {
+        name: '',
+        landlinePhone: '',
+        mobilePhone: '',
+        latitude: null,
+        longitude: null,
+        street: '',
+        number: '',
+        city: '',
+        postalCode: '',
+        country: '',
+        openingTime: '',
+        closingTime: '',
+        intervalMinutes: ''
+      };
+      this.errors = {};
 
-    return {
-      headquarter,
-      validation,
-      loading,
-      success,
-      error,
-      submitForm,
-      cancel
-    };
+      if (this.marker) {
+        this.marker.remove();
+        this.marker = null;
+      }
+    }
   }
-}
+};
 </script>
 
 <template>
-  <div class="headquarter-form-container">
-    <div v-if="success" class="success-message">
-      <i class="pi pi-check-circle"></i>
-      <span>Sede creada exitosamente</span>
+  <div class="sede-form-container">
+    <div class="form-header">
+      <h2>Crear Nueva Sede</h2>
     </div>
 
-    <div v-if="error" class="error-message form-error">
-      <i class="pi pi-times-circle"></i>
-      <span>{{ error }}</span>
-    </div>
-
-    <form @submit.prevent="submitForm" class="headquarter-form">
-      <!-- Basic Information -->
+    <form @submit.prevent="createAndFetchHeadquarter" class="sede-form">
+      <!-- Información Básica -->
       <div class="form-section">
-        <h3 class="section-title">Información Básica</h3>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="name">Nombre de Sede*</label>
-            <input
+        <h3>Información Básica</h3>
+        <div class="form-group">
+          <label for="name">Nombre de la Sede *</label>
+          <input
               id="name"
-              v-model="headquarter.name"
+              v-model="form.name"
               type="text"
-              class="form-control"
-              :class="{'error': !validation.name.valid}"
-              placeholder="Nombre de la sede"
-            />
-            <small v-if="!validation.name.valid" class="error-text">
-              {{ validation.name.message }}
-            </small>
-          </div>
+              placeholder="Ingrese el nombre de la sede"
+              :class="{ 'error': errors.name }"
+              @input="validateName"
+          />
+          <span v-if="errors.name" class="error-message">{{ errors.name }}</span>
         </div>
-
         <div class="form-row">
           <div class="form-group">
             <label for="landlinePhone">Teléfono Fijo</label>
             <input
-              id="landlinePhone"
-              v-model="headquarter.landlinePhone"
-              type="text"
-              class="form-control"
-              :class="{'error': !validation.landlinePhone.valid}"
-              placeholder="+511234567"
+                id="landlinePhone"
+                v-model="form.landlinePhone"
+                type="text"
+                placeholder="Ej: 4567890"
+                maxlength="7"
+                :class="{ 'error': errors.landlinePhone }"
+                @input="validateLandlinePhone"
             />
-            <small v-if="!validation.landlinePhone.valid" class="error-text">
-              {{ validation.landlinePhone.message }}
-            </small>
+            <span v-if="errors.landlinePhone" class="error-message">{{ errors.landlinePhone }}</span>
           </div>
-
           <div class="form-group">
             <label for="mobilePhone">Teléfono Móvil</label>
             <input
-              id="mobilePhone"
-              v-model="headquarter.mobilePhone"
-              type="text"
-              class="form-control"
-              :class="{'error': !validation.mobilePhone.valid}"
-              placeholder="987654321"
+                id="mobilePhone"
+                v-model="form.mobilePhone"
+                type="text"
+                placeholder="Ej: 987654321"
+                maxlength="9"
+                :class="{ 'error': errors.mobilePhone }"
+                @input="validateMobilePhone"
             />
-            <small v-if="!validation.mobilePhone.valid" class="error-text">
-              {{ validation.mobilePhone.message }}
-            </small>
+            <span v-if="errors.mobilePhone" class="error-message">{{ errors.mobilePhone }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Location Information -->
+      <!-- Ubicación -->
       <div class="form-section">
-        <h3 class="section-title">Ubicación</h3>
-
+        <h3>Ubicación</h3>
         <div class="form-row">
           <div class="form-group">
-            <label for="street">Dirección*</label>
+            <label for="street">Calle *</label>
             <input
-              id="street"
-              v-model="headquarter.street"
-              type="text"
-              class="form-control"
-              :class="{'error': !validation.street.valid}"
-              placeholder="Av. Principal"
+                id="street"
+                v-model="form.street"
+                type="text"
+                placeholder="Ingrese solo números"
+                :class="{ 'error': errors.street }"
+                @input="validateStreet"
             />
-            <small v-if="!validation.street.valid" class="error-text">
-              {{ validation.street.message }}
-            </small>
+            <span v-if="errors.street" class="error-message">{{ errors.street }}</span>
           </div>
-
-          <div class="form-group small-input">
-            <label for="number">Número</label>
+          <div class="form-group">
+            <label for="number">Número *</label>
             <input
-              id="number"
-              v-model="headquarter.number"
-              type="text"
-              class="form-control"
-              :class="{'error': !validation.number.valid}"
-              placeholder="123"
+                id="number"
+                v-model="form.number"
+                type="text"
+                placeholder="Ingrese solo letras"
+                :class="{ 'error': errors.number }"
+                @input="validateNumber"
             />
-            <small v-if="!validation.number.valid" class="error-text">
-              {{ validation.number.message }}
-            </small>
+            <span v-if="errors.number" class="error-message">{{ errors.number }}</span>
           </div>
         </div>
-
         <div class="form-row">
           <div class="form-group">
-            <label for="city">Ciudad*</label>
+            <label for="city">Ciudad *</label>
             <input
-              id="city"
-              v-model="headquarter.city"
-              type="text"
-              class="form-control"
-              :class="{'error': !validation.city.valid}"
-              placeholder="Lima"
+                id="city"
+                v-model="form.city"
+                type="text"
+                placeholder="Ingrese la ciudad"
+                :class="{ 'error': errors.city }"
+                @input="validateCity"
             />
-            <small v-if="!validation.city.valid" class="error-text">
-              {{ validation.city.message }}
-            </small>
+            <span v-if="errors.city" class="error-message">{{ errors.city }}</span>
           </div>
-
           <div class="form-group">
-            <label for="postalCode">Código Postal</label>
+            <label for="postalCode">Código Postal *</label>
             <input
-              id="postalCode"
-              v-model="headquarter.postalCode"
-              type="text"
-              class="form-control"
-              :class="{'error': !validation.postalCode.valid}"
-              placeholder="15023"
+                id="postalCode"
+                v-model="form.postalCode"
+                type="text"
+                placeholder="Ej: 1234"
+                maxlength="4"
+                :class="{ 'error': errors.postalCode }"
+                @input="validatePostalCode"
             />
-            <small v-if="!validation.postalCode.valid" class="error-text">
-              {{ validation.postalCode.message }}
-            </small>
+            <span v-if="errors.postalCode" class="error-message">{{ errors.postalCode }}</span>
           </div>
         </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="country">País*</label>
-            <input
+        <div class="form-group">
+          <label for="country">País *</label>
+          <input
               id="country"
-              v-model="headquarter.country"
+              v-model="form.country"
               type="text"
-              class="form-control"
-              :class="{'error': !validation.country.valid}"
-              placeholder="Perú"
-            />
-            <small v-if="!validation.country.valid" class="error-text">
-              {{ validation.country.message }}
-            </small>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="latitude">Latitud</label>
-            <input
-              id="latitude"
-              v-model.number="headquarter.latitude"
-              type="number"
-              step="0.000001"
-              class="form-control"
-              :class="{'error': !validation.latitude.valid}"
-              placeholder="-12.046373"
-            />
-            <small v-if="!validation.latitude.valid" class="error-text">
-              {{ validation.latitude.message }}
-            </small>
-          </div>
-
-          <div class="form-group">
-            <label for="longitude">Longitud</label>
-            <input
-              id="longitude"
-              v-model.number="headquarter.longitude"
-              type="number"
-              step="0.000001"
-              class="form-control"
-              :class="{'error': !validation.longitude.valid}"
-              placeholder="-77.042754"
-            />
-            <small v-if="!validation.longitude.valid" class="error-text">
-              {{ validation.longitude.message }}
-            </small>
-          </div>
+              placeholder="Ingrese el país"
+              :class="{ 'error': errors.country }"
+              @input="validateCountry"
+          />
+          <span v-if="errors.country" class="error-message">{{ errors.country }}</span>
         </div>
       </div>
 
-      <!-- Schedule Information -->
+      <!-- Coordenadas y Mapa -->
       <div class="form-section">
-        <h3 class="section-title">Horario de Atención</h3>
+        <h3>Coordenadas</h3>
+        <div class="coordinates-info">
+          <div class="coordinate-item">
+            <strong>Latitud:</strong> {{ form.latitude || 'No seleccionada' }}
+          </div>
+          <div class="coordinate-item">
+            <strong>Longitud:</strong> {{ form.longitude || 'No seleccionada' }}
+          </div>
+        </div>
+        <div class="map-container">
+          <div id="map" class="map"></div>
+          <p class="map-instruction">Haz clic en el mapa para seleccionar la ubicación de la sede</p>
+        </div>
+      </div>
 
+      <!-- Horarios -->
+      <div class="form-section">
+        <h3>Horarios de Atención</h3>
         <div class="form-row">
           <div class="form-group">
-            <label for="openingTime">Hora de Apertura*</label>
+            <label for="openingTime">Hora de Apertura *</label>
             <input
               id="openingTime"
-              v-model="headquarter.openingTime"
+              v-model="form.openingTime"
               type="time"
               class="form-control"
-              :class="{'error': !validation.openingTime.valid}"
+              :class="{ 'error': errors.openingTime }"
             />
-            <small v-if="!validation.openingTime.valid" class="error-text">
-              {{ validation.openingTime.message }}
-            </small>
+            <span v-if="errors.openingTime" class="error-message">{{ errors.openingTime }}</span>
           </div>
 
           <div class="form-group">
-            <label for="closingTime">Hora de Cierre*</label>
+            <label for="closingTime">Hora de Cierre *</label>
             <input
               id="closingTime"
-              v-model="headquarter.closingTime"
+              v-model="form.closingTime"
               type="time"
               class="form-control"
-              :class="{'error': !validation.closingTime.valid}"
+              :class="{ 'error': errors.closingTime }"
             />
-            <small v-if="!validation.closingTime.valid" class="error-text">
-              {{ validation.closingTime.message }}
-            </small>
+            <span v-if="errors.closingTime" class="error-message">{{ errors.closingTime }}</span>
           </div>
         </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="intervalMinutes">Intervalo de Reservas (minutos)*</label>
-            <input
+        <div class="form-group">
+          <label for="intervalMinutes">Intervalo de Citas (minutos) *</label>
+          <input
               id="intervalMinutes"
-              v-model.number="headquarter.intervalMinutes"
+              v-model="form.intervalMinutes"
               type="number"
               min="1"
+              placeholder="Ej: 30"
               class="form-control"
-              :class="{'error': !validation.intervalMinutes.valid}"
-              placeholder="30"
-            />
-            <small v-if="!validation.intervalMinutes.valid" class="error-text">
-              {{ validation.intervalMinutes.message }}
-            </small>
-          </div>
+              :class="{ 'error': errors.intervalMinutes }"
+              @input="validateIntervalMinutes"
+          />
+          <span v-if="errors.intervalMinutes" class="error-message">{{ errors.intervalMinutes }}</span>
         </div>
       </div>
 
+      <!-- Botones -->
       <div class="form-actions">
-        <button
-          type="button"
-          class="cancel-button"
-          @click="cancel"
-          :disabled="loading"
-        >
-          Cancelar
+        <button type="button" @click="resetForm" class="btn-secondary">
+          Limpiar Formulario
         </button>
-        <button
-          type="submit"
-          class="submit-button"
-          :disabled="loading"
-        >
-          <i class="pi pi-spin pi-spinner" v-if="loading"></i>
-          <span>{{ loading ? 'Creando sede...' : 'Crear Sede' }}</span>
+        <button type="submit" class="btn-primary" :disabled="!isFormValid">
+          Crear Sede
         </button>
       </div>
     </form>
@@ -487,46 +450,57 @@ export default {
 </template>
 
 <style scoped>
-.headquarter-form-container {
+.sede-form-container {
   width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background-color: var(--background-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.headquarter-form {
+.form-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.form-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sede-form {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
 .form-section {
-  background: linear-gradient(135deg, var(--primaryColor50) 0%, var(--background-color) 100%);
+  background: var(--background-color-light);
   border: 1px solid var(--primaryColor200);
   border-radius: 12px;
   padding: 1.5rem;
 }
 
-.section-title {
-  font-size: 1rem;
+.form-section h3 {
+  font-size: 1.125rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin: 0 0 1.25rem 0;
-  border-bottom: 1px solid var(--primaryColor200);
-  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .form-row {
   display: flex;
   gap: 1rem;
-  margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .form-group {
   flex: 1;
   display: flex;
   flex-direction: column;
-}
-
-.form-group.small-input {
-  flex: 0.3;
 }
 
 .form-group label {
@@ -536,7 +510,7 @@ export default {
   margin-bottom: 0.5rem;
 }
 
-.form-control {
+.form-group input {
   padding: 0.75rem 1rem;
   border: 1px solid var(--primaryColor200);
   border-radius: 8px;
@@ -546,102 +520,119 @@ export default {
   transition: all 0.2s ease;
 }
 
-.form-control:focus {
+.form-group input:focus {
   outline: none;
   border-color: var(--primaryColor500);
   box-shadow: 0 0 0 3px rgba(172, 131, 98, 0.1);
 }
 
-.form-control.error {
+.form-group input.error {
   border-color: #f44336;
   background-color: rgba(244, 67, 54, 0.05);
 }
 
-.error-text {
+.error-message {
   font-size: 0.75rem;
   color: #f44336;
   margin-top: 0.375rem;
+}
+.mapboxgl-marker {
+  z-index: 10;
+  pointer-events: auto;
+}
+.coordinates-info {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.coordinate-item {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.map-container {
+  position: relative;
+  height: 300px;
+  border: 1px solid var(--primaryColor200);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+}
+
+.map-instruction {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+  text-align: center;
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
-  margin-top: 1rem;
 }
 
-.cancel-button {
+.btn-primary,
+.btn-secondary {
   padding: 0.75rem 1.5rem;
-  background: transparent;
-  border: 1px solid var(--primaryColor300);
   border-radius: 8px;
-  color: var(--text-primary);
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.cancel-button:hover:not(:disabled) {
-  background: rgba(172, 131, 98, 0.1);
-}
-
-.submit-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, var(--primaryColor500) 0%, var(--primaryColor400) 100%);
+.btn-primary {
+  background: var(--primaryColor500);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(172, 131, 98, 0.3);
 }
 
-.submit-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(172, 131, 98, 0.4);
+.btn-primary:hover:not(:disabled) {
+  background: var(--primaryColor400);
 }
 
-.submit-button:disabled, .cancel-button:disabled {
+.btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.success-message, .form-error {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--primaryColor300);
+  color: var(--text-primary);
 }
 
-.success-message {
-  background: rgba(76, 175, 80, 0.1);
-  border: 1px solid rgba(76, 175, 80, 0.3);
-  color: #4CAF50;
-}
-
-.form-error {
-  background: rgba(244, 67, 54, 0.1);
-  border: 1px solid rgba(244, 67, 54, 0.3);
-  color: #f44336;
+.btn-secondary:hover {
+  background: rgba(172, 131, 98, 0.1);
 }
 
 @media (max-width: 768px) {
+  .sede-form-container {
+    padding: 1rem;
+  }
+
   .form-row {
     flex-direction: column;
     gap: 1rem;
   }
 
-  .form-group.small-input {
-    flex: 1;
+  .coordinates-info {
+    flex-direction: column;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .map {
+    height: 200px;
   }
 }
 </style>

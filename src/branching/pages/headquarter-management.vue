@@ -1,10 +1,11 @@
 <script>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router'; // Import useRouter
 import { BranchingApiService } from "@/branching/services/branching-api.service.js";
 import HeadquarterCard from '../components/headquarter-card.vue';
 import SupervisorCard from '../components/supervisor-card.vue';
-
 import HeadquarterForm from '../components/headquarter-form.vue';
+
 export default {
   name: "headquarter-management",
   components: {
@@ -25,8 +26,8 @@ export default {
     const showAssignModal = ref(false);
     const searchTerm = ref('');
     const notification = ref(null);
+    const router = useRouter();
 
-    // Fetch all headquarters
     const fetchHeadquarters = async () => {
       loading.value = true;
       try {
@@ -185,6 +186,10 @@ export default {
       showHeadquarterModal.value = true;
     };
 
+    const navigateToCreateHeadquarter = () => {
+      router.push('/create-headquarter');
+    };
+
     const closeCreateHeadquarterModal = () => {
       showHeadquarterModal.value = false;
     };
@@ -271,7 +276,8 @@ export default {
       openCreateHeadquarterModal,
       closeCreateHeadquarterModal,
       onHeadquarterCreated,
-      getAssignButtonText
+      getAssignButtonText,
+      navigateToCreateHeadquarter
 
     };
   }
@@ -332,10 +338,7 @@ export default {
                 Sedes Disponibles
               </h2>
               <div class="sidebar-actions">
-                <button
-                    @click="openCreateHeadquarterModal"
-                    class="nav-button"
-                >
+                <button @click="navigateToCreateHeadquarter" class="nav-button">
                   <i class="pi pi-plus"></i>
                   <span>Nueva Sede</span>
                 </button>
