@@ -69,25 +69,37 @@ const handleImageUpload = (event) => {
 };
 
 // Fetch categories when edit dialog opens
+// Modificar la función openEditDialog para añadir mejor manejo de errores
 const openEditDialog = async () => {
   try {
-    const response = await menuService.getAllCategories();
-    categories.value = (response.data || ['ENTRADAS', 'PLATOS_PRINCIPALES', 'POSTRES', 'BEBIDAS'])
-      .map(category => ({
-        label: formatCategoryName(category),
-        value: category
-      }));
+    console.log('Abriendo diálogo de edición...'); // Para depuración
 
-    // Reset the edited item to the current menu item
+    // Primero establecemos showEditDialog a true para asegurar que el diálogo se abre
+    showEditDialog.value = true;
+
+    // Luego cargamos los datos
     editedItem.value = {...props.menuItem};
     imagePreview.value = props.menuItem.imageBase64;
-    showEditDialog.value = true;
+
+    // Por último cargamos las categorías
+    const response = await menuService.getAllCategories();
+    categories.value = (response.data || ['ENTRADAS', 'PLATOS_PRINCIPALES', 'POSTRES', 'BEBIDAS'])
+        .map(category => ({
+          label: formatCategoryName(category),
+          value: category
+        }));
+
+    console.log('Diálogo abierto correctamente'); // Para depuración
   } catch (error) {
-    console.error('Error fetching categories:', error);
-    toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar las categorías', life: 3000 });
+    console.error('Error al abrir el diálogo de edición:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'No se pudo abrir el diálogo de edición',
+      life: 3000
+    });
   }
 };
-
 // Format category name for display
 const formatCategoryName = (category) => {
   if (!category) return '';
@@ -287,16 +299,16 @@ onMounted(() => {
 .menu-item-card {
   display: flex;
   background-color: white;
-  border-radius: 15px;
-  box-shadow: 0 5px 20px rgba(172, 131, 98, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   overflow: hidden;
   transition: transform 0.3s, box-shadow 0.3s;
   position: relative;
 }
 
 .menu-item-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(172, 131, 98, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .menu-item-image {
@@ -310,11 +322,11 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s;
+  transition: transform 0.4s;
 }
 
 .menu-item-card:hover .menu-item-image img {
-  transform: scale(1.1);
+  transform: scale(1.03);
 }
 
 .menu-item-content {
@@ -335,52 +347,61 @@ onMounted(() => {
 .menu-item-name {
   margin: 0;
   font-size: 1.3rem;
-  color: var(--text-primary);
+  color: #4a3f35;
   font-weight: 600;
 }
 
 .menu-item-price {
-  background-color: var(--primaryColor100);
-  color: var(--primaryColor800);
-  padding: 4px 10px;
+  background-color: #f5f2ee;
+  color: #6e5f4d;
+  padding: 6px 10px;
+  margin-left: 10px;
   border-radius: 20px;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.1rem;
 }
 
 .menu-item-description {
-  color: var(--text-secondary);
+  color: #8a7a68;
   margin: 0;
   line-height: 1.4;
   flex-grow: 1;
 }
 
 .admin-controls {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  display: flex;
-  gap: 8px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
+   position: absolute;
+   bottom: 10px;
+   right: 10px;
+   display: flex;
+   gap: 8px;
+   opacity: 1; /* Cambiar de 0 a 1 para que siempre sean visibles */
+   transition: all 0.3s ease;
+ }
 
 .menu-item-card:hover .admin-controls {
-  opacity: 1;
+  transform: scale(1.05); /* En lugar de cambiar opacidad, cambiamos escala al pasar el ratón */
 }
 
+/* Mejorar el estilo del botón para hacerlo más visible */
 .edit-button {
-  color: var(--primaryColor600);
-  border-color: var(--primaryColor400);
+  color: #6e5f4d;
+  border-color: #c5b8a5;
+  background-color: #f9f7f5;
 }
 
 .edit-button:hover {
-  background-color: var(--primaryColor50);
-  border-color: var(--primaryColor600);
+  background-color: #efe8e0;
+  border-color: #b4a389;
+  transform: scale(1.1);
+}
+
+.delete-button {
+  border-color: #c5b8a5;
 }
 
 .delete-button:hover {
-  background-color: #FFEEEE;
+  background-color: #f9f7f5;
+  transform: scale(1.1);
 }
 
 .form-container {
@@ -396,8 +417,8 @@ onMounted(() => {
 }
 
 .form-field label {
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: 500;
+  color: #4a3f35;
 }
 
 .image-upload-container {
@@ -407,7 +428,7 @@ onMounted(() => {
 .image-preview {
   margin-top: 12px;
   padding: 10px;
-  border: 1px dashed var(--primaryColor300);
+  border: 1px dashed #dcd4cc;
   border-radius: 8px;
   text-align: center;
 }
@@ -418,6 +439,7 @@ onMounted(() => {
   object-fit: contain;
 }
 
+/* Mantener el resto del código igual */
 @media (max-width: 768px) {
   .menu-item-image {
     width: 100px;
