@@ -125,17 +125,24 @@ export default {
         const bookingsResponse = await bookingService.getAllBookings();
 
         if (bookingsResponse?.data) {
-          // Filtrar solo las reservas de esta sede
+          // Filtrar solo las reservas válidas de esta sede
           bookings.value = bookingsResponse.data
-              .filter(booking => booking.headquarterId === hqId)
+              .filter(booking => {
+                // Verificar que la reserva pertenece a esta sede
+                if (booking.headquarterId !== hqId) return false;
+
+                // Verificar que la reserva tiene una mesa asignada que existe en esta sede
+                const tableExists = tables.value.some(t => t.id === booking.tableId);
+                return tableExists;
+              })
               .map(booking => {
                 const table = tables.value.find(t => t.id === booking.tableId);
                 return {
                   ...booking,
                   clientName: booking.clientName || 'Cliente',
                   tableNumber: table?.tableNumber || 'N/A',
-                  tableCapacity: table?.seats || 'Desconocida',
-                  zone: 'Sala principal'
+                  tableCapacity: table?.seats || 0,
+                  zone: table?.zone || 'Sin asignar'
                 };
               });
         }
