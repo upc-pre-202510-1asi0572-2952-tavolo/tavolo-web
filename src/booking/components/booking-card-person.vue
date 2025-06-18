@@ -79,90 +79,70 @@ export default {
 
 <style scoped>
 .booking-card {
-  background-color: rgba(186, 108, 45, 0.06);
-  border-radius: 10px;
+  background-color: white;
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 12px;
+}
+
+.booking-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .booking-card-header {
-  color: #563F25;
-  padding: 15px;
+  padding: 15px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(172, 131, 98, 0.2);
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #f9f7f5;
 }
 
 .booking-card-header h3 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #392B1B;
 }
 
 .booking-card-content {
-  padding: 15px;
-  flex-grow: 1;
+  padding: 15px 20px;
 }
 
 .booking-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px;
-  border-radius: 8px;
-  background-color: rgba(172, 131, 98, 0.1);
+  gap: 10px;
+  background-color: transparent;
 }
 
 .info-row {
-  margin-bottom: 6px;
   display: flex;
+  align-items: center;
+  margin-bottom: 0;
 }
 
 .info-label {
-  font-weight: bold;
-  width: 100px;
-  color: #392B1B;
+  font-weight: 600;
+  width: 90px;
+  color: #563F25;
+  font-size: 0.9rem;
 }
 
 .info-value {
-  flex-grow: 1;
   color: #392B1B;
 }
 
 .status-badge {
   background-color: #AC8362;
   color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: bold;
-}
-
-.booking-card-actions {
-  padding: 15px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  border-top: 1px solid rgba(172, 131, 98, 0.2);
-}
-
-.btn {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 0.8rem;
-  transition: opacity 0.2s;
-}
-
-.view-btn {
-  background-color: #8A724A;
-  color: white;
-}
-
-.btn:hover {
-  opacity: 0.9;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 </style>
