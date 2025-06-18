@@ -13,7 +13,7 @@
               </div>
               <div class="brand-info">
                 <h2 class="brand-title">Panel Administrativo</h2>
-                <p class="brand-subtitle">Bienvenido al centro de gestión</p>
+                <p class="brand-subtitle">Tu centro de gestión de creación de sedes y supervisores</p>
               </div>
             </div>
           </div>
@@ -85,7 +85,7 @@
               </div>
               <div class="brand-info">
                 <h2 class="brand-title">Panel de Supervisor</h2>
-                <p class="brand-subtitle">Gestión de sede y reservas</p>
+                <p class="brand-subtitle">Tu centro de gestión de reservas y mesas</p>
               </div>
             </div>
           </div>
@@ -199,7 +199,6 @@ onMounted(async () => {
 <style scoped>
 .card-content-admin {
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
 }
 
 .stat-item {
@@ -214,7 +213,7 @@ onMounted(async () => {
 .stat-icon {
   width: 56px;
   height: 56px;
-  background: rgb(170, 132, 89);
+  background: #a88467;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -292,7 +291,7 @@ onMounted(async () => {
 
 .header-content {
   padding: 1.25rem;
-  background: linear-gradient(135deg, var(--primaryColor50) 0%, var(--primaryColor100) 100%);
+  background: rgba(186, 108, 45, 0.06);
   border-radius: 12px;
   border: 1px solid var(--primaryColor100);
   box-shadow: 0 4px 8px rgba(57, 43, 27, 0.1);
@@ -337,7 +336,10 @@ onMounted(async () => {
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 1.5rem;
 }
-
+.stats-card{
+  border: 1px solid var(--primaryColor100);
+  border-radius: 0 0 12px 12px;
+}
 .dashboard-card,
 .supervisor-actions {
   background-color: rgba(186, 108, 45, 0.06);
@@ -359,7 +361,7 @@ onMounted(async () => {
 .card-header {
   padding: 1.25rem;
   border-bottom: 1px solid var(--primaryColor100);
-  background: linear-gradient(135deg, var(--primaryColor50) 0%, var(--primaryColor100) 100%);
+  background: #a88467;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -367,19 +369,20 @@ onMounted(async () => {
 
 .card-header i {
   font-size: 1.25rem;
-  color: var(--primaryColor600);
+  color: white;
 }
 
 .card-header h3 {
   font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  color: white;
   margin: 0;
 }
 
 .card-content {
   padding: 1.25rem;
   flex: 1;
+  border: 1px solid var(--primaryColor100);
+  border-radius: 0 0 12px 12px;
 }
 
 .actions-container {
@@ -390,13 +393,12 @@ onMounted(async () => {
 }
 
 .action-button {
-
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
   margin-bottom: 0.5rem;
-  background: rgba(194, 154, 108, 0.25);
+  background: rgba(194, 154, 108, 0.08);
   border: 1px solid var(--primaryColor200);
   border-radius: 10px;
   color: var(--text-primary);
@@ -406,7 +408,7 @@ onMounted(async () => {
 }
 
 .action-button:hover {
-  background: rgba(194, 154, 108, 0.45);
+  background: rgba(188, 148, 102, 0.38);
   border-color: var(--primaryColor300);
   transform: translateX(5px);
 }

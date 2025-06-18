@@ -21,24 +21,25 @@ const handleDelete = () => {
 <template>
   <div class="table-card" :class="'zone-' + table.zone?.toLowerCase()">
     <div class="table-header">
-      <h3>Mesa #{{ table.tableNumber }}</h3>
+      <h3 class="table-number">Mesa #{{ table.tableNumber }}</h3>
     </div>
     <div class="table-content">
       <div class="table-info">
-        <p><strong>ID:</strong> {{ table.id }}</p>
-        <p>Capacidad: {{ table.seats }} personas</p>
-        <p>Zona: <span class="zone-indicator" :class="'zone-' + table.zone?.toLowerCase()"></span> {{ table.getZoneDisplayName() }}</p>
-        <p>Estado: {{ table.status }}</p>
+        <div class="info-item">
+          <i class="pi pi-users"></i>
+          <span>{{ table.seats }} personas</span>
+        </div>
+        <div class="info-item">
+          <i class="pi pi-map-marker"></i>
+          <span>{{ table.getZoneDisplayName() }}</span>
+          <span class="zone-indicator" :class="'zone-' + table.zone?.toLowerCase()"></span>
+        </div>
       </div>
       <div class="table-actions">
-        <pv-button
-          icon="pi pi-trash"
-          class="delete-btn"
-          @click="handleDelete"
-          label="Eliminar"
-          severity="danger"
-          size="small"
-        />
+        <button class="delete-button" @click="handleDelete">
+          <i class="pi pi-trash"></i>
+          <span>Eliminar</span>
+        </button>
       </div>
     </div>
   </div>
@@ -46,86 +47,89 @@ const handleDelete = () => {
 
 <style scoped>
 .table-card {
-  background: linear-gradient(135deg, rgba(172, 131, 98, 0.08) 0%, rgba(186, 108, 45, 0.12) 100%);
-  border-radius: 10px;
-  box-shadow: 0 3px 10px rgba(57, 43, 27, 0.1);
-  padding: 1.25rem;
+  background: rgba(213, 153, 105, 0.07);
+  border-radius: 8px;
+  border: rgba(123, 93, 70, 0.2) 1px solid;
+  box-shadow: 0 2px 10px rgba(57, 43, 27, 0.15);
+  padding: 1rem;
   transition: all 0.3s ease;
-  border: 1px solid rgba(172, 131, 98, 0.2);
-  position: relative;
 }
 
 .table-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(57, 43, 27, 0.15);
-  border-color: rgba(172, 131, 98, 0.3);
+  box-shadow: 0 4px 10px rgba(57, 43, 27, 0.15);
 }
 
 .table-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(172, 131, 98, 0.2);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #8A724A;
 }
 
-.table-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #563F25;
+.table-number {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #392B1B;
   margin: 0;
 }
 
-.table-info {
+.table-content {
+  display: flex;
   flex-direction: column;
+  gap: 1rem;
 }
 
-.info-row {
+.table-info {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
-.info-label {
-  font-weight: 600;
-  width: 100px;
-  color: #392B1B;
-}
-
-.info-value {
-  color: #392B1B;
-}
-
-.table-status {
-  padding: 0.35rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  background-color: #AC8362;
-  color: white;
-}
-
-.actions {
+.info-item {
   display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #392B1B;
+}
+
+.info-item i {
+  color: #563F25;
+  font-size: 1rem;
+}
+
+.zone-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 0.5rem;
+}
+
+
+
+.table-actions {
   justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1.25rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(172, 131, 98, 0.2);
+  display: flex;
 }
 
-.delete-btn {
-  background-color: #C2754A;
-  color: white;
-  padding: 0.5rem 0.75rem;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.2s;
+.delete-button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #AC311C;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
-.delete-btn:hover {
-  background-color: #A5542C;
+.delete-button:hover {
+  background: #8C2916;
 }
 </style>
