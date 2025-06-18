@@ -31,9 +31,9 @@ const handleDelete = () => {
         <p>Estado: {{ table.status }}</p>
       </div>
       <div class="table-actions">
-        <pv-button 
-          icon="pi pi-trash" 
-          class="delete-btn" 
+        <pv-button
+          icon="pi pi-trash"
+          class="delete-btn"
           @click="handleDelete"
           label="Eliminar"
           severity="danger"
@@ -46,78 +46,86 @@ const handleDelete = () => {
 
 <style scoped>
 .table-card {
-  background-color: #FAF5F0;
-  border-radius: 5px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
-  color: #333333;
-  border-top: 4px solid #ddd;
+  background: linear-gradient(135deg, rgba(172, 131, 98, 0.08) 0%, rgba(186, 108, 45, 0.12) 100%);
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(57, 43, 27, 0.1);
+  padding: 1.25rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(172, 131, 98, 0.2);
+  position: relative;
 }
 
-/* Estilos según la zona */
-.table-card.zone-main_hall {
-  border-top-color: #4287f5; /* Azul para MAIN_HALL */
+.table-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(57, 43, 27, 0.15);
+  border-color: rgba(172, 131, 98, 0.3);
 }
 
-.table-card.zone-window {
-  border-top-color: #42d77d; /* Verde para WINDOW */
-}
-
-.table-card.zone-terrace {
-  border-top-color: #f5a742; /* Naranja para TERRACE */
-}
-
-.zone-indicator {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 5px;
-}
-
-.zone-indicator.zone-main_hall {
-  background-color: #4287f5; /* Azul para MAIN_HALL */
-}
-
-.zone-indicator.zone-window {
-  background-color: #42d77d; /* Verde para WINDOW */
-}
-
-.zone-indicator.zone-terrace {
-  background-color: #f5a742; /* Naranja para TERRACE */
-}
-
-.table-header h3 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: #333333;
-}
-
-.table-content {
+.table-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
+  border-bottom: 1px solid rgba(172, 131, 98, 0.2);
 }
 
-.table-info p {
-  font-size: 14px;
-  margin-bottom: 5px;
-  color: #333333;
+.table-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #563F25;
+  margin: 0;
+}
+
+.table-info {
+  flex-direction: column;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-label {
+  font-weight: 600;
+  width: 100px;
+  color: #392B1B;
+}
+
+.info-value {
+  color: #392B1B;
+}
+
+.table-status {
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: #AC8362;
+  color: white;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(172, 131, 98, 0.2);
 }
 
 .delete-btn {
-  background-color: #9C2B1B;
-  color: var(--primaryColor50);
-  border-radius: 1.5em;
-  transition: transform 0.2s ease-in-out, background-color 0.2s, border-color 0.2s;
+  background-color: #C2754A;
+  color: white;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.delete-btn {
-  background-color: #9C2B1B;
-  color: var(--primaryColor50);
-  transform: scale(1.05);
-  transition: transform 0.2s ease-in-out;
+.delete-btn:hover {
+  background-color: #A5542C;
 }
-</style> 
+</style>
