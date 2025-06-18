@@ -690,6 +690,7 @@ export default {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
+  margin-bottom: 9px;
   border: none;
   background: transparent;
   border-radius: 8px;
@@ -702,7 +703,8 @@ export default {
 
 .nav-button:hover {
   color: var(--text-primary);
-  background: rgba(172, 131, 98, 0.1);
+  background: rgba(172, 131, 98, 0.22);
+  cursor: pointer;
 }
 
 .nav-button.active {
@@ -801,7 +803,7 @@ export default {
 .sidebar-header {
   padding: 1.5rem;
   border-bottom: 1px solid var(--primaryColor100);
-  background: linear-gradient(135deg, var(--primaryColor50) 0%, var(--primaryColor100) 100%);
+  background: var(--primaryColor50);
 }
 
 .sidebar-title {
@@ -924,7 +926,7 @@ export default {
 .panel-header {
   padding: 1.5rem;
   border-bottom: 1px solid var(--primaryColor100);
-  background: linear-gradient(135deg, var(--primaryColor50) 0%, var(--primaryColor100) 100%);
+  background: var(--primaryColor50);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -1012,7 +1014,7 @@ export default {
 }
 
 .supervisor-card {
-  background: linear-gradient(135deg, var(--primaryColor50) 0%, var(--background-color) 100%);
+  background: var(--primaryColor50);
   border: 1px solid var(--primaryColor200);
   border-radius: 12px;
   padding: 1.25rem;
@@ -1315,7 +1317,7 @@ export default {
   margin: 0;
 }
 .supervisor-form {
-  background: linear-gradient(135deg, var(--primaryColor50) 0%, var(--background-color) 100%);
+  background: var(--primaryColor50);
   border: 1px solid var(--primaryColor200);
   border-radius: 12px;
   padding: 1.5rem;
@@ -1375,7 +1377,7 @@ export default {
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 1.75rem;
-  background: linear-gradient(135deg, var(--primaryColor500) 0%, var(--primaryColor400) 100%);
+  background: #AC8362;
   color: white;
   border: none;
   border-radius: 8px;
