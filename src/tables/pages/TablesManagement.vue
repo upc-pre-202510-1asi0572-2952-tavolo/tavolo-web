@@ -201,37 +201,65 @@ export default {
 </script>
 
 <template>
-  <div class="tables-management">
+  <div class="tables-management-page">
     <pv-toast />
-    <div class="header">
-      <h1 class="title">Gestionar mesas</h1>
+
+    <div class="page-header">
+      <h1 class="page-title">
+        <i class="pi pi-table"></i>
+        Gestión de Mesas
+      </h1>
+      <p class="page-subtitle">Administra las mesas disponibles en tu sede asignada</p>
     </div>
 
-    <!-- Sección de acciones con botón -->
-    <div class="actions-container">
-      <pv-button
-        label="+ Agregar mesa"
-        class="add-table-btn"
-        @click="openAddTableModal"
-        :disabled="!headquarterId"
-      />
-    </div>
+    <div class="tables-container">
+      <!-- Vista de carga -->
+      <div v-if="loading" class="loading-state">
+        <div class="loading-spinner">
+          <i class="pi pi-spin pi-spinner"></i>
+        </div>
+        <p>Cargando mesas...</p>
+      </div>
 
-    <div v-if="loading" class="loading-state">
-      <p>Cargando mesas...</p>
+      <!-- Error - No hay sede asociada -->
+      <div v-else-if="!headquarterId" class="empty-state">
+        <div class="empty-icon">
+          <i class="pi pi-building"></i>
+        </div>
+        <h3 class="empty-title">Sede no encontrada</h3>
+        <p class="empty-description">No se encontró una sede asociada a su cuenta.</p>
+      </div>
+
+      <!-- Vista principal -->
+      <div v-else>
+        <div class="actions-container">
+          <pv-button
+              label="Agregar mesa"
+              icon="pi pi-plus"
+              class="add-table-btn"
+              @click="openAddTableModal"
+          />
+        </div>
+
+        <TableList v-if="tables.length > 0" :tables="tables" @delete="handleDeleteTable" />
+
+        <div v-else class="empty-state">
+          <div class="empty-icon">
+            <i class="pi pi-table"></i>
+          </div>
+          <h3 class="empty-title">Sin mesas</h3>
+          <p class="empty-description">No hay mesas registradas en esta sede. Agrega una nueva mesa para comenzar.</p>
+        </div>
+      </div>
     </div>
-    <div v-else-if="!headquarterId" class="error-state">
-      <p>No se encontró una sede asociada a su cuenta.</p>
-    </div>
-    <TableList v-else :tables="tables" @delete="handleDeleteTable" />
 
     <!-- Modal personalizado para agregar mesa -->
     <div v-if="showModal" class="custom-modal-overlay" @click.self="closeModal">
       <div class="custom-modal-container">
         <TableForm
-          @save="handleAddTable"
-          @cancel="closeModal"
-          :predefinedHeadquarterId="headquarterId"
+            @save="handleAddTable"
+            @cancel="closeModal"
+            :predefinedHeadquarterId="headquarterId"
         />
       </div>
     </div>
@@ -239,81 +267,125 @@ export default {
 </template>
 
 <style scoped>
-.header {
-  text-align: center;
-  margin-bottom: 25px;
-  position: relative;
+.tables-management-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
 }
 
-.title {
-  color: var(--primaryColor900);
-  text-align: left;
-  padding: 0 0 20px 0;
+.page-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.page-title {
+  font-size: 2rem;
+  color: var(--primaryColor700);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.page-subtitle {
+  color: var(--primaryColor600);
+  font-size: 1rem;
+}
+
+.tables-container {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--primaryColor100);
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 3rem;
+}
+
+.loading-spinner {
+  font-size: 2rem;
+  color: var(--primaryColor500);
+  margin-bottom: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.empty-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--primaryColor200) 0%, var(--primaryColor300) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  color: var(--primaryColor600);
+  font-size: 2rem;
+}
+
+.empty-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+}
+
+.empty-description {
+  font-size: 1rem;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .actions-container {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
 }
 
 .add-table-btn {
-  margin-left: auto;
   background-color: var(--primaryColor500);
   border-color: var(--primaryColor500);
-  color: var(--primaryColor50);
-  border-radius: 1.5em;
-  transition: transform 0.2s ease-in-out, background-color 0.2s, border-color 0.2s;
+  color: white;
+  transition: background-color 0.3s ease;
 }
 
 .add-table-btn:hover {
-  background-color: var(--primaryColor400);
-  border-color: var(--primaryColor400);
-  color: var(--primaryColor50);
-  transform: scale(1.05);
-  transition: transform 0.2s ease-in-out;
+  background-color: var(--primaryColor600);
+  border-color: var(--primaryColor600);
 }
 
-.loading-state, .error-state {
-  display: flex;
-  justify-content: center;
-  padding: 50px 0;
-  color: #333333;
-}
-
-.error-state {
-  color: #9C2B1B;
-}
-
-/* Modal personalizado */
 .custom-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
-  backdrop-filter: blur(2px);
+  z-index: 1000;
 }
 
-.custom-modal-container {
-  animation: modalFadeIn 0.3s ease;
-  max-width: 100%;
-}
-
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.5rem;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .tables-container {
+    padding: 1rem;
+  }
+
+  .custom-modal-container {
+    width: 95%;
   }
 }
 </style>

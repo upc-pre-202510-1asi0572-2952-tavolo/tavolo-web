@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mapbox/mapbox-gl-geocoder": "^5.0.3",
     "@primevue/core": "^4.3.4",
     "@primevue/themes": "^4.3.4",
     "axios": "^1.9.0",

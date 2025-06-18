@@ -5,7 +5,10 @@ import { BookingService } from '@/booking/services/booking.service';
 import { Booking } from '@/booking/model/booking.entitie';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
+import {HeadquartersService} from "@/booking/services/headquarter.service.js";
 
+const headquarterService = new HeadquartersService();
+const headquartersMap = ref({});
 const authStore = useAuthenticationStore();
 const bookingService = new BookingService();
 const confirm = useConfirm();
@@ -34,6 +37,27 @@ const responsiveOptions = ref([
         numScroll: 1
     }
 ]);
+const loadHeadquarterNames = async () => {
+  try {
+    // Usar el método correcto del servicio
+    const headquarters = await headquarterService.getAllHeadquarters();
+
+    // Crear el mapa de IDs a nombres
+    if (headquarters && Array.isArray(headquarters)) {
+      headquarters.forEach(hq => {
+        headquartersMap.value[hq.id] = hq.name;
+      });
+      console.log('Mapa de sedes cargado:', headquartersMap.value);
+    }
+  } catch (err) {
+    console.error('Error al cargar datos de sedes:', err);
+  }
+};
+const getHeadquarterName = (id) => {
+  console.log('Buscando sede con ID:', id);
+  console.log('Mapa de sedes disponible:', headquartersMap.value);
+  return headquartersMap.value[id] || `Sede ${id}`;
+};
 
 const noBookingsMessage = computed(() => {
     if (loading.value) return "Cargando tus reservas...";
@@ -43,10 +67,16 @@ const noBookingsMessage = computed(() => {
 });
 
 const formatDate = (dateString) => {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('es-ES', options);
-};
+  // Asegurarnos de que la fecha se interprete correctamente
+  // Formato de entrada esperado: "YYYY-MM-DD"
+  const [year, month, day] = dateString.split('-').map(num => parseInt(num, 10));
 
+  // Crear fecha especificando todos los componentes para evitar problemas de zona horaria
+  const date = new Date(year, month - 1, day, 12, 0, 0);
+
+  const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+  return date.toLocaleDateString('es-ES', options).replace(/^\w/, (c) => c.toUpperCase());
+};
 const formatTime = (timeString) => {
     const [hours, minutes] = timeString.split(':');
     return `${hours}:${minutes}`;
@@ -67,7 +97,7 @@ const deleteBooking = (id) => {
             try {
                 await bookingService.delete(id);
                 bookings.value = bookings.value.filter(booking => booking.id !== id);
-                
+
                 toast.add({
                     severity: 'success',
                     summary: 'Reserva Cancelada',
@@ -86,32 +116,25 @@ const deleteBooking = (id) => {
         }
     });
 };
-
 onMounted(async () => {
-    try {
-        loading.value = true;
-        const clientId = authStore.currentUserId;
+  try {
+    loading.value = true;
+    const clientId = authStore.currentUserId;
 
-        // Verificar si hay ID de cliente
-        if (!clientId) {
-            error.value = "No se pudo identificar al usuario";
-            loading.value = false;
-            return;
-        }
+    // Verificar si hay ID de cliente
+    if (!clientId) {
+      error.value = "No se pudo identificar al usuario";
+      loading.value = false;
+      return;
+    }
 
-        // Log the URL we're trying to access for debugging
-        console.log(`Fetching bookings for client: ${clientId}`);
-
-        // Try using a more robust approach with explicit error handling
-        const response = await bookingService.getBookingsByClientId(clientId)
-            .catch(err => {
-                console.error('API endpoint error:', err.response?.status, err.response?.data);
-                throw new Error(`Error al acceder a las reservas: ${err.response?.status || 'Error de conexión'}`);
-            });
-
-        // Verificar si hay datos
-        if (response && response.data && Array.isArray(response.data)) {
-            bookings.value = response.data.map(item => new Booking({
+    // Cargar nombres de sedes y reservas en paralelo
+    await Promise.all([
+      loadHeadquarterNames(),
+      bookingService.getBookingsByClientId(clientId)
+          .then(response => {
+            if (response && response.data && Array.isArray(response.data)) {
+              bookings.value = response.data.map(item => new Booking({
                 id: item.id,
                 clientId: item.clientId,
                 tableNumber: item.tableNumber,
@@ -119,27 +142,39 @@ onMounted(async () => {
                 tableId: item.tableId,
                 bookingDate: item.bookingDate,
                 bookingSlots: item.bookingSlots || []
-            }));
-        } else {
-            bookings.value = [];
-        }
-    } catch (err) {
-        console.error('Error al cargar las reservas:', err);
-        error.value = err.message || 'Error al cargar reservas';
-        bookings.value = []; // Ensure bookings is empty on error
-    } finally {
-        loading.value = false;
-    }
+              }));
+            } else {
+              bookings.value = [];
+            }
+          })
+          .catch(err => {
+            console.error('API endpoint error:', err.response?.status, err.response?.data);
+            throw new Error(`Error al acceder a las reservas: ${err.response?.status || 'Error de conexión'}`);
+          })
+    ]);
+  } catch (err) {
+    console.error('Error al cargar las reservas:', err);
+    toast.add({
+      severity: 'error',
+      summary: 'No pudimos cargar tus reservas',
+      detail: 'Intenta de nuevo más tarde',
+      life: 3000
+    });
+    bookings.value = [];
+    error.value = err.message || 'Error al cargar reservas';
+  } finally {
+    loading.value = false;
+  }
 });
 </script>
 
 <template>
     <pv-toast />
     <pv-confirm-dialog></pv-confirm-dialog>
-    
+
     <div class="booking-carousel-container">
         <h1 class="carousel-title">Mis Reservas</h1>
-        
+
         <!-- Muestra mensaje si no hay reservas -->
         <div v-if="bookings.length === 0" class="no-bookings-message">
             <i class="pi pi-calendar-times no-bookings-icon"></i>
@@ -148,14 +183,14 @@ onMounted(async () => {
                 <pv-button label="Hacer una reserva" icon="pi pi-calendar-plus" class="p-button-outlined" />
             </router-link>
         </div>
-        
+
         <!-- Carrusel de reservas -->
-        <pv-carousel 
-            v-else 
-            :value="bookings" 
-            :numVisible="3" 
-            :numScroll="1" 
-            :responsiveOptions="responsiveOptions" 
+        <pv-carousel
+            v-else
+            :value="bookings"
+            :numVisible="3"
+            :numScroll="1"
+            :responsiveOptions="responsiveOptions"
             circular
             class="booking-carousel"
         >
@@ -171,35 +206,35 @@ onMounted(async () => {
                             <span>Mesa {{ slotProps.data.tableNumber }}</span>
                         </div>
                         <!-- Elemento para mostrar el ID de la sede -->
-                        <div class="booking-detail">
-                            <i class="pi pi-building"></i>
-                            <span>Sede ID: {{ slotProps.data.headquarterId }}</span>
-                        </div>
+                      <div class="booking-detail">
+                        <i class="pi pi-building"></i>
+                        <span>Sede: {{ getHeadquarterName(slotProps.data.headquarterId) }}</span>
+                      </div>
                         <div class="booking-detail" v-if="slotProps.data.bookingSlots.length > 0">
                             <i class="pi pi-clock"></i>
                             <span>
-                                {{ formatTime(slotProps.data.bookingSlots[0].startTime) }} - 
+                                {{ formatTime(slotProps.data.bookingSlots[0].startTime) }} -
                                 {{ formatTime(slotProps.data.bookingSlots[0].endTime) }}
                             </span>
                         </div>
                     </div>
                     <div class="booking-footer">
-                        <pv-button icon="pi pi-eye" class="p-button-rounded p-button-text" 
+                        <pv-button icon="pi pi-eye" class="p-button-rounded p-button-text"
                                 tooltip="Ver detalles" :tooltipOptions="{ position: 'top' }"
                                 @click="showBookingDetails(slotProps.data)" />
-                        <pv-button icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" 
+                        <pv-button icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger"
                                 tooltip="Cancelar reserva" :tooltipOptions="{ position: 'top' }"
                                 @click="deleteBooking(slotProps.data.id)" />
                     </div>
                 </div>
             </template>
         </pv-carousel>
-        
+
         <!-- Diálogo de detalles de reserva -->
-        <pv-dialog 
-            v-model:visible="detailsDialogVisible" 
-            modal 
-            header="Detalles de la Reserva" 
+        <pv-dialog
+            v-model:visible="detailsDialogVisible"
+            modal
+            header="Detalles de la Reserva"
             :style="{ width: '90%', maxWidth: '500px' }"
             :dismissableMask="true"
         >
@@ -211,36 +246,36 @@ onMounted(async () => {
                     </h3>
                     <div class="details-content">
                         <p class="detail-item">
-                            <span class="detail-label">Fecha:</span>
+                            <span class="detail-label">Fecha: </span>
                             <span class="detail-value">{{ formatDate(selectedBooking.bookingDate) }}</span>
                         </p>
                         <p class="detail-item" v-if="selectedBooking.bookingSlots && selectedBooking.bookingSlots.length > 0">
-                            <span class="detail-label">Hora:</span>
+                            <span class="detail-label">Hora: </span>
                             <span class="detail-value">
-                                {{ formatTime(selectedBooking.bookingSlots[0].startTime) }} - 
+                                {{ formatTime(selectedBooking.bookingSlots[0].startTime) }} -
                                 {{ formatTime(selectedBooking.bookingSlots[0].endTime) }}
                             </span>
                         </p>
                     </div>
                 </div>
-                
+
                 <div class="details-section">
                     <h3 class="details-title">
                         <i class="pi pi-map-marker"></i>
                         Ubicación
                     </h3>
                     <div class="details-content">
+                      <p class="detail-item">
+                        <span class="detail-label">Sede: </span>
+                        <span class="detail-value">{{ getHeadquarterName(selectedBooking.headquarterId) }}</span>
+                      </p>
                         <p class="detail-item">
-                            <span class="detail-label">Sede:</span>
-                            <span class="detail-value">Sede #{{ selectedBooking.headquarterId }}</span>
-                        </p>
-                        <p class="detail-item">
-                            <span class="detail-label">Mesa:</span>
+                            <span class="detail-label">Mesa: </span>
                             <span class="detail-value">{{ selectedBooking.tableNumber }}</span>
                         </p>
                     </div>
                 </div>
-                
+
                 <div class="details-section">
                     <h3 class="details-title">
                         <i class="pi pi-info-circle"></i>
@@ -248,26 +283,22 @@ onMounted(async () => {
                     </h3>
                     <div class="details-content">
                         <p class="detail-item">
-                            <span class="detail-label">ID de Reserva:</span>
+                            <span class="detail-label">ID de Reserva: </span>
                             <span class="detail-value">{{ selectedBooking.id }}</span>
-                        </p>
-                        <p class="detail-item">
-                            <span class="detail-label">ID de Cliente:</span>
-                            <span class="detail-value">{{ selectedBooking.clientId }}</span>
                         </p>
                     </div>
                 </div>
-                
+
                 <div class="details-actions">
-                    <pv-button 
-                        label="Cerrar" 
-                        icon="pi pi-times" 
+                    <pv-button
+                        label="Cerrar"
+                        icon="pi pi-times"
                         @click="detailsDialogVisible = false"
                     />
-                    <pv-button 
-                        label="Cancelar Reserva" 
-                        icon="pi pi-trash" 
-                        class="p-button-danger" 
+                    <pv-button
+                        label="Cancelar Reserva"
+                        icon="pi pi-trash"
+                        class="p-button-danger"
                         @click="detailsDialogVisible = false; deleteBooking(selectedBooking.id)"
                     />
                 </div>
@@ -558,7 +589,7 @@ onMounted(async () => {
         margin: 0.3rem;
         height: 240px;
     }
-    
+
     .carousel-title {
         font-size: 1.3rem;
         margin-bottom: 1rem;
@@ -569,11 +600,11 @@ onMounted(async () => {
     .booking-card {
         height: 220px;
     }
-    
+
     .booking-detail {
         margin-bottom: 0.5rem;
     }
-    
+
     .booking-date {
         font-size: 1rem;
     }

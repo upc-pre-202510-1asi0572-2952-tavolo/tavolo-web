@@ -77,6 +77,7 @@ onUnmounted(() => {
 <template>
   <div class="headquarter-card">
     <div class="card-image">
+      <img src="@/assets/images/sede%20imagen.png" />
     </div>
     <div class="card-content">
       <h3 class="card-title">{{ headquarter.name }}</h3>
@@ -142,14 +143,23 @@ onUnmounted(() => {
 }
 
 .card-image {
-  width: 30%;
-  height: auto;
-  background-color: #DCC8B9;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='30' cy='30' r='10' fill='%23C0B2A6'/%3E%3Cpath d='M20 70 L50 40 L80 70' stroke='%23C0B2A6' stroke-width='2' fill='none'/%3E%3C/svg%3E");
-  background-size: cover;
-  background-position: center;
+  width: 300px;
+  height:300px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.headquarter-card:hover .card-image img {
+  transform: scale(1.05);
+}
 .card-content {
   flex: 1;
   padding: 25px;

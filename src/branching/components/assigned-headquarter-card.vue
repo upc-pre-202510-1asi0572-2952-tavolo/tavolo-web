@@ -169,7 +169,6 @@ export default {
 }
 </script>
 
-
 <template>
   <div class="headquarter-card" v-if="!loading && !error">
     <div class="card-header">
@@ -208,10 +207,7 @@ export default {
 <style scoped>
 .headquarter-card {
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(57, 43, 27, 0.15);
   overflow: hidden;
-  background-color: rgba(186, 108, 45, 0.06);
-  margin: 0 auto 20px;
   width: 100%;
 }
 

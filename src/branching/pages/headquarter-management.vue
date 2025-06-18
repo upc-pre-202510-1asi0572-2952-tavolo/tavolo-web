@@ -1,10 +1,10 @@
 <script>
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router'; // Import useRouter
-import { BranchingApiService } from "@/branching/services/branching-api.service.js";
+import { useRouter, useRoute } from 'vue-router'; // Importar useRouteimport { BranchingApiService } from "@/branching/services/branching-api.service.js";
 import HeadquarterCard from '../components/headquarter-card.vue';
 import SupervisorCard from '../components/supervisor-card.vue';
 import HeadquarterForm from '../components/headquarter-form.vue';
+import {BranchingApiService} from "@/branching/services/branching-api.service.js";
 
 export default {
   name: "headquarter-management",
@@ -15,9 +15,10 @@ export default {
   },
   setup() {
     const apiService = new BranchingApiService();
+    const route = useRoute(); // Importa useRoute de vue-router
 
     // State variables
-    const activeTab = ref('headquarters');
+    const activeTab = ref(route.query.tab === 'supervisors' ? 'supervisors' : 'headquarters');
     const selectedHeadquarter = ref(null);
     const supervisors = ref([]);
     const allSupervisors = ref([]);
@@ -711,16 +712,31 @@ export default {
 }
 
 /* Notification Toast */
+/* Notification Toast */
 .notification-toast {
   position: fixed;
-  top: 2rem;
-  right: 2rem;
-  z-index: 50;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(8px);
-  animation: slideIn 0.3s ease;
+  bottom: 20px; /* Cambiado de top a bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  animation: slideUp 0.3s ease-out forwards; /* Cambiar animación */
+}
+
+/* Actualizar la animación para que aparezca desde abajo */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
 
 .notification-toast.success {

@@ -7,7 +7,7 @@ import BookingCardPerson from './booking-card-person.vue';
 import { useAuthenticationStore } from "@/iam/services/authentication.store.js";
 
 export default {
-  name: "HeadquarterBookings",
+  name: "c",
   components: {
     BookingCardPerson,
   },

@@ -48,27 +48,30 @@ export default {
   <div class="booking-card">
     <div class="booking-card-header">
       <h3>{{ clientName }}</h3>
+      <span class="status-badge">Reserva</span>
     </div>
 
     <div class="booking-card-content">
-      <div class="info-row">
-        <span class="info-label">Mesa:</span>
-        <span class="info-value">{{ booking.tableNumber }}</span>
-      </div>
+      <div class="booking-info">
+        <div class="info-row">
+          <span class="info-label">Mesa:</span>
+          <span class="info-value">{{ booking.tableNumber }}</span>
+        </div>
 
-      <div class="info-row">
-        <span class="info-label">Capacidad:</span>
-        <span class="info-value">{{ booking.tableCapacity }} personas</span>
-      </div>
+        <div class="info-row">
+          <span class="info-label">Capacidad:</span>
+          <span class="info-value">{{ booking.tableCapacity }} personas</span>
+        </div>
 
-      <div class="info-row">
-        <span class="info-label">Hora:</span>
-        <span class="info-value">{{ formatTime(booking.bookingSlots) }}</span>
-      </div>
+        <div class="info-row">
+          <span class="info-label">Hora:</span>
+          <span class="info-value">{{ formatTime(booking.bookingSlots) }}</span>
+        </div>
 
-      <div class="info-row">
-        <span class="info-label">Fecha:</span>
-        <span class="info-value">{{ booking.bookingDate }}</span>
+        <div class="info-row">
+          <span class="info-label">Fecha:</span>
+          <span class="info-value">{{ booking.bookingDate }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -76,10 +79,9 @@ export default {
 
 <style scoped>
 .booking-card {
-  background-color: #DCC8B9;
-  border-radius: 10px;
   background-color: rgba(186, 108, 45, 0.06);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
 }
@@ -90,6 +92,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid rgba(172, 131, 98, 0.2);
 }
 
 .booking-card-header h3 {
@@ -102,8 +105,17 @@ export default {
   flex-grow: 1;
 }
 
+.booking-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: rgba(172, 131, 98, 0.1);
+}
+
 .info-row {
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   display: flex;
 }
 
@@ -118,35 +130,21 @@ export default {
   color: #392B1B;
 }
 
+.status-badge {
+  background-color: #AC8362;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
 .booking-card-actions {
   padding: 15px;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  border-top: 1px solid #AC8362;
-}
-
-.status-badge {
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.confirmed {
-  background-color: #4caf50;
-  color: white;
-}
-
-.pending {
-  background-color: #ff9800;
-  color: white;
-}
-
-.cancelled {
-  background-color: #f44336;
-  color: white;
+  border-top: 1px solid rgba(172, 131, 98, 0.2);
 }
 
 .btn {
@@ -161,16 +159,6 @@ export default {
 
 .view-btn {
   background-color: #8A724A;
-  color: white;
-}
-
-.edit-btn {
-  background-color: #AC8362;
-  color: white;
-}
-
-.cancel-btn {
-  background-color: #b3261e;
   color: white;
 }
 

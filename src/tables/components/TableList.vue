@@ -22,10 +22,10 @@ const handleDelete = (tableId) => {
       <p>No hay mesas registradas</p>
     </div>
     <div v-else class="table-grid">
-      <TableCard 
-        v-for="table in tables" 
-        :key="table.id" 
-        :table="table" 
+      <TableCard
+        v-for="table in tables"
+        :key="table.id"
+        :table="table"
         @delete="handleDelete"
       />
     </div>
@@ -59,4 +59,4 @@ const handleDelete = (tableId) => {
   font-size: 16px;
   color: #666;
 }
-</style> 
+</style>
